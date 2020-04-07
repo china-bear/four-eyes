@@ -1,4 +1,4 @@
-## 插件化开发基础篇—classloader
+## 插件化开发基础篇—类加载
 
 ### 1. 什么是类加载？
 
@@ -37,6 +37,10 @@
 
 初始化： 执行静态语句，包括静态变量的赋值还有静态代码块
 
+<img src="./img/类的生命周期.svg" alt="图片替换文本" width="650" height="250" align="bottom" />
+
+​																				图一：类的生命周期
+
 
 
 ### 4. 双亲委派
@@ -51,7 +55,7 @@ JDK自带的类加载器有三种：
 
 ![Parents Delegation Model](./img/Parents Delegation Model.svg)
 
-​																图一：Parents Delegation Model
+​																图二：Parents Delegation Model
 
 #### 4.1 确立父子关系
 
@@ -223,8 +227,6 @@ public abstract class ClassLoader {
 }
 ```
 
-
-
 3. defineClass()：用来将byte字节流解析成JVM能够识别的Class对象
 
 #### 4.3优缺点
@@ -233,11 +235,13 @@ public abstract class ClassLoader {
 
 首先，通过这种层级关可以避免类的重复加载，当父亲已经加载了该类时，就没有必要子ClassLoader再加载一次；
 
-其次，确保核心类的安全，防止核心类型被随意替换。假设通过网络传递一个名为java.lang.Integer的类，通过双亲委托模式传递到启动类加载器，而启动类加载器在核心Java API发现这个名字的类，发现该类已被加载，并不会重新加载网络传递的过来的java.lang.Integer，而直接返回已加载过的Integer.class，这样便可以防止核心API库被随意篡改
+其次，确保核心类的安全，防止核心类型被随意替换。假设通过网络传递一个名为java.lang.Integer的类，通过双亲委托模式传递到启动类加载器，而启动类加载器在核心Java API发现这个名字的类，发现该类已被加载，并不会重新加载网络传递的过来的java.lang.Integer，而是直接返回已加载过的Integer.class，这样便可以防止核心API库被随意篡改
 
 2. 缺点：
 
 双亲委托机制中存在一个隐含的关系是一个类是由某个类加载器加载的，那么它所引用的其他类都是由该类加载器来加载，一些SPI接口属于 Java 核心库如`java.sql.DriverManager`，由BootstrapClassLoader加载，当SPI接口想要引用第三方实现类的具体方法时，BootstrapClassLoader无法加载位于classpath下的第三方实现类
+
+
 
 ### 5. 打破双亲委派
 
@@ -304,13 +308,13 @@ public final class ServiceLoader<S> implements Iterable<S> {
     }
 }
 ```
-<img src="./img/ThreadContextClassLoader.png" alt="图片替换文本" width="600" height="400" align="bottom" />
+<img src="./img/ThreadContextClassLoader.svg" alt="图片替换文本" width="600" height="400" align="bottom" />
 
 ​																	图三：ThreadContextClassLoader
 
 ### 6. 命名空间
 
-在JVM中，即使两个class对象来源同一个Class文件，被同一个虚拟机所加载，但只要加载它们的ClassLoader实例对象不同，那么这两个类对象也是不相等的。那么一个进程中有诸多类加载器加载的class，这些class对象是完全隔离的吗？满足怎样的条件才能互相引用？请看
+在JVM中，即使两个class对象来源同一个Class文件，被同一个虚拟机所加载，但只要加载它们的ClassLoader实例对象不同，那么这两个class对象也是不相等的。那么一个进程中有诸多不同类加载器加载的class，这些class对象是完全隔离的吗？满足怎样的条件才能互相引用？请看下篇《利用SPI进行插件化开发》
 
 > 参考：
 > https://blog.csdn.net/javazejian/article/details/73413292

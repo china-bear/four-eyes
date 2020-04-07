@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg version="1.1" xmlns:xl="http://www.w3.org/1999/xlink" xmlns="http://www.w3.org/2000/svg" xmlns:dc="http://purl.org/dc/elements/1.1/" viewBox="-1844 4654 781 489" width="781" height="489">
+  <defs>
+    <filter id="Shadow" filterUnits="userSpaceOnUse" x="-1844" y="4654">
+      <feGaussianBlur in="SourceAlpha" result="blur" stdDeviation="1.308"/>
+      <feOffset in="blur" result="offset" dx="0" dy="2"/>
+      <feFlood flood-color="black" flood-opacity=".5" result="flood"/>
+      <feComposite in="flood" in2="offset" operator="in"/>
+    </filter>
+    <font-face font-family="PingFang SC" font-size="16" panose-1="2 11 4 0 0 0 0 0 0 0" units-per-em="1000" underline-position="-150" underline-thickness="58" slope="0" x-height="600" cap-height="860" ascent="1060.0021" descent="-340.0007" font-weight="400">
+      <font-face-src>
+        <font-face-name name="PingFangSC-Regular"/>
+      </font-face-src>
+    </font-face>
+    <font-face font-family="Helvetica Neue" font-size="16" panose-1="2 0 5 3 0 0 0 2 0 4" units-per-em="1000" underline-position="-100" underline-thickness="50" slope="0" x-height="517" cap-height="714" ascent="951.9958" descent="-212.99744" font-weight="400">
+      <font-face-src>
+        <font-face-name name="HelveticaNeue"/>
+      </font-face-src>
+    </font-face>
+    <marker orient="auto" overflow="visible" markerUnits="strokeWidth" id="FilledArrow_Marker" stroke-linejoin="miter" stroke-miterlimit="10" viewBox="-1 -4 10 8" markerWidth="10" markerHeight="8" color="black">
+      <g>
+        <path d="M 8 0 L 0 -3 L 0 3 Z" fill="currentColor" stroke="currentColor" stroke-width="1"/>
+      </g>
+    </marker>
+  </defs>
+  <metadata> Produced by OmniGraffle 7.10.2 
+    <dc:date>2020-04-07 13:08:53 +0000</dc:date>
+  </metadata>
+  <g id="SPI_JDBC_" stroke-dasharray="none" fill-opacity="1" fill="none" stroke-opacity="1" stroke="none">
+    <title>SPI_JDBC实现</title>
+    <rect fill="white" x="-1844" y="4654" width="781" height="489"/>
+    <g id="SPI_JDBC_: 图层 1">
+      <title>图层 1</title>
+      <g id="Graphic_19_shadow" filter="url(#Shadow)">
+        <rect x="-1541.5" y="4681.25" width="210" height="60" fill="#c0ffff"/>
+        <rect x="-1541.5" y="4681.25" width="210" height="60" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="0"/>
+      </g>
+      <g id="Graphic_18_shadow" filter="url(#Shadow)">
+        <rect x="-1541.5" y="4802.25" width="210" height="60" fill="#c0ffff"/>
+        <rect x="-1541.5" y="4802.25" width="210" height="60" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="0"/>
+      </g>
+      <g id="Graphic_17_shadow" filter="url(#Shadow)">
+        <rect x="-1541.5" y="4923.25" width="210" height="60" fill="#c0ffff"/>
+        <rect x="-1541.5" y="4923.25" width="210" height="60" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="0"/>
+      </g>
+      <g id="Graphic_16_shadow" filter="url(#Shadow)">
+        <rect x="-1821" y="4802.25" width="210" height="60" fill="#c0ffff"/>
+        <rect x="-1821" y="4802.25" width="210" height="60" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="0"/>
+      </g>
+      <g id="Graphic_19">
+        <rect x="-1541.5" y="4681.25" width="210" height="60" fill="#c0ffff"/>
+        <rect x="-1541.5" y="4681.25" width="210" height="60" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="0"/>
+        <text transform="translate(-1536.5 4689.25)" fill="black">
+          <tspan font-family="PingFang SC" font-size="16" font-weight="400" fill="black" x="52" y="17">引导类加载器</tspan>
+          <tspan font-family="PingFang SC" font-size="16" font-weight="400" fill="black" x="14.576" y="39">Bootstrap ClassLoader</tspan>
+        </text>
+      </g>
+      <g id="Graphic_18">
+        <rect x="-1541.5" y="4802.25" width="210" height="60" fill="#c0ffff"/>
+        <rect x="-1541.5" y="4802.25" width="210" height="60" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="0"/>
+        <text transform="translate(-1536.5 4810.25)" fill="black">
+          <tspan font-family="PingFang SC" font-size="16" font-weight="400" fill="black" x="52" y="17">拓展类加载器</tspan>
+          <tspan font-family="PingFang SC" font-size="16" font-weight="400" fill="black" x="39.16" y="39"> ExtClassLoader</tspan>
+        </text>
+      </g>
+      <g id="Graphic_17">
+        <rect x="-1541.5" y="4923.25" width="210" height="60" fill="#c0ffff"/>
+        <rect x="-1541.5" y="4923.25" width="210" height="60" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="0"/>
+        <text transform="translate(-1536.5 4931.25)" fill="black">
+          <tspan font-family="PingFang SC" font-size="16" font-weight="400" fill="black" x="52" y="17">系统类加载器</tspan>
+          <tspan font-family="PingFang SC" font-size="16" font-weight="400" fill="black" x="36.536" y="39"> AppClassLoader</tspan>
+        </text>
+      </g>
+      <g id="Graphic_16">
+        <rect x="-1821" y="4802.25" width="210" height="60" fill="#c0ffff"/>
+        <rect x="-1821" y="4802.25" width="210" height="60" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="0"/>
+        <text transform="translate(-1816 4810.25)" fill="black">
+          <tspan font-family="PingFang SC" font-size="16" font-weight="400" fill="black" x="28" y="17">线程上下文类加载器</tspan>
+          <tspan font-family="PingFang SC" font-size="16" font-weight="400" fill="black" x="21.992" y="39"> ContextClassLoader</tspan>
+        </text>
+      </g>
+      <g id="Graphic_15">
+        <ellipse cx="-1121.75" cy="4711.25" rx="56.7500906809325" ry="55.2500882840798" fill="#c0ffff"/>
+        <ellipse cx="-1121.75" cy="4711.25" rx="56.7500906809325" ry="55.2500882840798" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="3"/>
+        <text transform="translate(-1162.15 4691.026)" fill="black">
+          <tspan font-family="Helvetica Neue" font-size="16" font-weight="400" fill="black" x="24.256" y="15">rt.jar</tspan>
+          <tspan font-family="Helvetica Neue" font-size="16" font-weight="400" fill="black" x="3.96" y="35.448">SPI</tspan>
+          <tspan font-family="PingFang SC" font-size="16" font-weight="400" fill="black" y="35.448">核心类</tspan>
+        </text>
+      </g>
+      <g id="Graphic_14">
+        <ellipse cx="-1716" cy="5085.5" rx="56.7500906809326" ry="55.2500882840798" fill="#c0ffff"/>
+        <ellipse cx="-1716" cy="5085.5" rx="56.7500906809326" ry="55.2500882840798" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="3"/>
+        <text transform="translate(-1756.4 5054.276)" fill="black">
+          <tspan font-family="Helvetica Neue" font-size="16" font-weight="400" fill="black" x="13.88" y="15">jdbc.jar</tspan>
+          <tspan font-family="Helvetica Neue" font-size="16" font-weight="400" fill="black" x="11.96" y="35.448">SPI</tspan>
+          <tspan font-family="PingFang SC" font-size="16" font-weight="400" fill="black" y="35.448">接口</tspan>
+          <tspan font-family="PingFang SC" font-size="16" font-weight="400" fill="black" x="16.4" y="57.448">实现类</tspan>
+        </text>
+      </g>
+      <g id="Line_13">
+        <line x1="-1436.5" y1="4802.25" x2="-1436.5" y2="4751.15" marker-end="url(#FilledArrow_Marker)" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+      </g>
+      <g id="Line_12">
+        <line x1="-1436.5" y1="4923.25" x2="-1436.5" y2="4872.15" marker-end="url(#FilledArrow_Marker)" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+      </g>
+      <g id="Line_11">
+        <line x1="-1331.5" y1="4711.25" x2="-1186.9" y2="4711.25" marker-end="url(#FilledArrow_Marker)" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+      </g>
+      <g id="Line_10">
+        <path d="M -1541.5 4711.25 L -1655 4741.25 L -1708.9996 4795.2496" marker-end="url(#FilledArrow_Marker)" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+      </g>
+      <g id="Graphic_9">
+        <text transform="translate(-1782.5 4671.25)" fill="black">
+          <tspan font-family="PingFang SC" font-size="16" font-weight="400" fill="black" x="40" y="17">反向委托</tspan>
+          <tspan font-family="PingFang SC" font-size="16" font-weight="400" fill="black" x="0" y="39">线程上下文类加载器</tspan>
+          <tspan font-family="PingFang SC" font-size="16" font-weight="400" fill="black" x="21.48" y="61">加载的</tspan>
+          <tspan font-family="Helvetica Neue" font-size="16" font-weight="400" fill="black" y="61">jdbc.jar</tspan>
+        </text>
+      </g>
+      <g id="Graphic_8">
+        <text transform="translate(-1317.144 4679.25)" fill="black">
+          <tspan font-family="PingFang SC" font-size="16" font-weight="400" fill="black" x="22737368e-20" y="17">加载核心</tspan>
+          <tspan font-family="Helvetica Neue" font-size="16" font-weight="400" fill="black" y="17">rt.jar</tspan>
+          <tspan font-family="PingFang SC" font-size="16" font-weight="400" fill="black" y="17">包</tspan>
+        </text>
+      </g>
+      <g id="Line_7">
+        <path d="M -1716 4862.25 L -1659 4936.25 L -1551.298 4951.8324" marker-end="url(#FilledArrow_Marker)" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+      </g>
+      <g id="Graphic_6">
+        <text transform="translate(-1665.62 4877.75)" fill="black">
+          <tspan font-family="PingFang SC" font-size="16" font-weight="400" fill="black" x="35.56" y="17">默认是</tspan>
+          <tspan font-family="Helvetica Neue" font-size="16" font-weight="400" fill="black" x="0" y="37">AppClassLoader</tspan>
+        </text>
+      </g>
+      <g id="Line_5">
+        <line x1="-1716" y1="4862.25" x2="-1716" y2="5021.85" marker-end="url(#FilledArrow_Marker)" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+      </g>
+      <g id="Graphic_4">
+        <text transform="translate(-1839 4927.25)" fill="black">
+          <tspan font-family="PingFang SC" font-size="16" font-weight="400" fill="black" x="0" y="17">上下文类加载器</tspan>
+          <tspan font-family="PingFang SC" font-size="16" font-weight="400" fill="black" x="13.48" y="39">加载</tspan>
+          <tspan font-family="Helvetica Neue" font-size="16" font-weight="400" fill="black" y="39">jdbc.jar</tspan>
+        </text>
+      </g>
+      <g id="Line_3">
+        <path d="M -1119.5 4767.25 L -1117 5077.75 L -1372.5 5079.25 L -1650.8612 5084.315" marker-end="url(#FilledArrow_Marker)" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+      </g>
+      <g id="Graphic_2">
+        <text transform="translate(-1536.5 5092.25)" fill="black">
+          <tspan font-family="Helvetica Neue" font-size="16" font-weight="400" fill="black" x="6679102e-19" y="17">rt.jar</tspan>
+          <tspan font-family="PingFang SC" font-size="16" font-weight="400" fill="black" y="17">中</tspan>
+          <tspan font-family="Helvetica Neue" font-size="16" font-weight="400" fill="black" y="17">spi</tspan>
+          <tspan font-family="PingFang SC" font-size="16" font-weight="400" fill="black" y="17">接口调用实现类中的方法</tspan>
+        </text>
+      </g>
+    </g>
+  </g>
+</svg>

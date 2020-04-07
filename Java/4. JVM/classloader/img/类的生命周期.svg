@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg version="1.1" xmlns:xl="http://www.w3.org/1999/xlink" xmlns="http://www.w3.org/2000/svg" xmlns:dc="http://purl.org/dc/elements/1.1/" viewBox="-1004 4221 709 260" width="709" height="260">
+  <defs>
+    <filter id="Shadow" filterUnits="userSpaceOnUse" x="-1004" y="4221">
+      <feGaussianBlur in="SourceAlpha" result="blur" stdDeviation="1.308"/>
+      <feOffset in="blur" result="offset" dx="0" dy="2"/>
+      <feFlood flood-color="black" flood-opacity=".5" result="flood"/>
+      <feComposite in="flood" in2="offset" operator="in"/>
+    </filter>
+    <font-face font-family="PingFang SC" font-size="16" panose-1="2 11 4 0 0 0 0 0 0 0" units-per-em="1000" underline-position="-150" underline-thickness="58" slope="0" x-height="600" cap-height="860" ascent="1060.0021" descent="-340.0007" font-weight="400">
+      <font-face-src>
+        <font-face-name name="PingFangSC-Regular"/>
+      </font-face-src>
+    </font-face>
+    <marker orient="auto" overflow="visible" markerUnits="strokeWidth" id="FilledArrow_Marker" stroke-linejoin="miter" stroke-miterlimit="10" viewBox="-1 -4 10 8" markerWidth="10" markerHeight="8" color="black">
+      <g>
+        <path d="M 8 0 L 0 -3 L 0 3 Z" fill="currentColor" stroke="currentColor" stroke-width="1"/>
+      </g>
+    </marker>
+  </defs>
+  <metadata> Produced by OmniGraffle 7.10.2 
+    <dc:date>2020-04-07 12:58:03 +0000</dc:date>
+  </metadata>
+  <g id="版面____" stroke-dasharray="none" fill-opacity="1" fill="none" stroke-opacity="1" stroke="none">
+    <title>类加载过程</title>
+    <rect fill="white" x="-1004" y="4221" width="709" height="260"/>
+    <g id="版面____: 图层 1">
+      <title>图层 1</title>
+      <g id="Graphic_16_shadow" filter="url(#Shadow)">
+        <rect x="-541.6311" y="4424.642" width="100.74101" height="50.85826" fill="#c0ffff"/>
+        <rect x="-541.6311" y="4424.642" width="100.74101" height="50.85826" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+      </g>
+      <g id="Graphic_15_shadow" filter="url(#Shadow)">
+        <rect x="-729.3573" y="4424.642" width="100.74101" height="50.85826" fill="#c0ffff"/>
+        <rect x="-729.3573" y="4424.642" width="100.74101" height="50.85826" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+      </g>
+      <g id="Graphic_9_shadow" filter="url(#Shadow)">
+        <rect x="-408.5235" y="4298.385" width="100.74101" height="50.85826" fill="#c0ffff"/>
+        <rect x="-408.5235" y="4298.385" width="100.74101" height="50.85826" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+      </g>
+      <g id="Graphic_10_shadow" filter="url(#Shadow)">
+        <rect x="-558.62355" y="4298.385" width="100.74101" height="50.85826" fill="#c0ffff"/>
+        <rect x="-558.62355" y="4298.385" width="100.74101" height="50.85826" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+      </g>
+      <g id="Graphic_11_shadow" filter="url(#Shadow)">
+        <rect x="-702.6549" y="4298.385" width="100.74101" height="50.85826" fill="#c0ffff"/>
+        <rect x="-702.6549" y="4298.385" width="100.74101" height="50.85826" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+      </g>
+      <g id="Graphic_12_shadow" filter="url(#Shadow)">
+        <rect x="-846.6862" y="4298.385" width="100.74101" height="50.85826" fill="#c0ffff"/>
+        <rect x="-846.6862" y="4298.385" width="100.74101" height="50.85826" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+      </g>
+      <g id="Graphic_18_shadow" filter="url(#Shadow)">
+        <path d="M -866.5 4266.5 L -451.5 4266.5 C -448.7386 4266.5 -446.5 4268.7386 -446.5 4271.5 L -446.5 4353.2435 C -446.5 4356.005 -448.7386 4358.2435 -451.5 4358.2435 L -866.5 4358.2435 C -869.2614 4358.2435 -871.5 4356.005 -871.5 4353.2435 L -871.5 4271.5 C -871.5 4268.7386 -869.2614 4266.5 -866.5 4266.5 Z" fill="white"/>
+        <path d="M -866.5 4266.5 L -451.5 4266.5 C -448.7386 4266.5 -446.5 4268.7386 -446.5 4271.5 L -446.5 4353.2435 C -446.5 4356.005 -448.7386 4358.2435 -451.5 4358.2435 L -866.5 4358.2435 C -869.2614 4358.2435 -871.5 4356.005 -871.5 4353.2435 L -871.5 4271.5 C -871.5 4268.7386 -869.2614 4266.5 -866.5 4266.5 Z" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+      </g>
+      <g id="Graphic_13_shadow" filter="url(#Shadow)">
+        <rect x="-990.7175" y="4298.385" width="100.74101" height="50.85826" fill="#c0ffff"/>
+        <rect x="-990.7175" y="4298.385" width="100.74101" height="50.85826" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+      </g>
+      <g id="Graphic_14_shadow" filter="url(#Shadow)">
+        <path d="M -994.7175 4223 L -303.7825 4223 C -301.02106 4223 -298.7825 4225.2386 -298.7825 4228 L -298.7825 4362.2435 C -298.7825 4365.005 -301.02106 4367.2435 -303.7825 4367.2435 L -994.7175 4367.2435 C -997.479 4367.2435 -999.7175 4365.005 -999.7175 4362.2435 L -999.7175 4228 C -999.7175 4225.2386 -997.479 4223 -994.7175 4223 Z" fill="white"/>
+        <path d="M -994.7175 4223 L -303.7825 4223 C -301.02106 4223 -298.7825 4225.2386 -298.7825 4228 L -298.7825 4362.2435 C -298.7825 4365.005 -301.02106 4367.2435 -303.7825 4367.2435 L -994.7175 4367.2435 C -997.479 4367.2435 -999.7175 4365.005 -999.7175 4362.2435 L -999.7175 4228 C -999.7175 4225.2386 -997.479 4223 -994.7175 4223 Z" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+      </g>
+      <g id="Graphic_16">
+        <rect x="-541.6311" y="4424.642" width="100.74101" height="50.85826" fill="#c0ffff"/>
+        <rect x="-541.6311" y="4424.642" width="100.74101" height="50.85826" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+        <text transform="translate(-536.6311 4428.071)" fill="black">
+          <tspan font-family="PingFang SC" font-size="16" font-weight="400" fill="black" x="29.370505" y="17">使用</tspan>
+          <tspan font-family="PingFang SC" font-size="16" font-weight="400" fill="black" x="24.370505" y="39">Using</tspan>
+        </text>
+      </g>
+      <g id="Graphic_15">
+        <rect x="-729.3573" y="4424.642" width="100.74101" height="50.85826" fill="#c0ffff"/>
+        <rect x="-729.3573" y="4424.642" width="100.74101" height="50.85826" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+        <text transform="translate(-724.3573 4428.071)" fill="black">
+          <tspan font-family="PingFang SC" font-size="16" font-weight="400" fill="black" x="29.370505" y="17">卸载</tspan>
+          <tspan font-family="PingFang SC" font-size="16" font-weight="400" fill="black" x="8.210505" y="39">Unloading</tspan>
+        </text>
+      </g>
+      <g id="Group_4">
+        <g id="Graphic_14">
+          <path d="M -994.7175 4223 L -303.7825 4223 C -301.02106 4223 -298.7825 4225.2386 -298.7825 4228 L -298.7825 4362.2435 C -298.7825 4365.005 -301.02106 4367.2435 -303.7825 4367.2435 L -994.7175 4367.2435 C -997.479 4367.2435 -999.7175 4365.005 -999.7175 4362.2435 L -999.7175 4228 C -999.7175 4225.2386 -997.479 4223 -994.7175 4223 Z" fill="white"/>
+          <path d="M -994.7175 4223 L -303.7825 4223 C -301.02106 4223 -298.7825 4225.2386 -298.7825 4228 L -298.7825 4362.2435 C -298.7825 4365.005 -301.02106 4367.2435 -303.7825 4367.2435 L -994.7175 4367.2435 C -997.479 4367.2435 -999.7175 4365.005 -999.7175 4362.2435 L -999.7175 4228 C -999.7175 4225.2386 -997.479 4223 -994.7175 4223 Z" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+          <text transform="translate(-994.7175 4228)" fill="black">
+            <tspan font-family="PingFang SC" font-size="16" font-weight="400" fill="black" x="297.4675" y="17">类的加载过程</tspan>
+          </text>
+        </g>
+        <g id="Graphic_13">
+          <rect x="-990.7175" y="4298.385" width="100.74101" height="50.85826" fill="#c0ffff"/>
+          <rect x="-990.7175" y="4298.385" width="100.74101" height="50.85826" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+          <text transform="translate(-985.7175 4301.8143)" fill="black">
+            <tspan font-family="PingFang SC" font-size="16" font-weight="400" fill="black" x="29.370505" y="17">加载</tspan>
+            <tspan font-family="PingFang SC" font-size="16" font-weight="400" fill="black" x="15.570505" y="39">Loading</tspan>
+          </text>
+        </g>
+        <g id="Group_17">
+          <g id="Graphic_18">
+            <path d="M -866.5 4266.5 L -451.5 4266.5 C -448.7386 4266.5 -446.5 4268.7386 -446.5 4271.5 L -446.5 4353.2435 C -446.5 4356.005 -448.7386 4358.2435 -451.5 4358.2435 L -866.5 4358.2435 C -869.2614 4358.2435 -871.5 4356.005 -871.5 4353.2435 L -871.5 4271.5 C -871.5 4268.7386 -869.2614 4266.5 -866.5 4266.5 Z" fill="white"/>
+            <path d="M -866.5 4266.5 L -451.5 4266.5 C -448.7386 4266.5 -446.5 4268.7386 -446.5 4271.5 L -446.5 4353.2435 C -446.5 4356.005 -448.7386 4358.2435 -451.5 4358.2435 L -866.5 4358.2435 C -869.2614 4358.2435 -871.5 4356.005 -871.5 4353.2435 L -871.5 4271.5 C -871.5 4268.7386 -869.2614 4266.5 -866.5 4266.5 Z" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+            <text transform="translate(-866.5 4271.5)" fill="black">
+              <tspan font-family="PingFang SC" font-size="16" font-weight="400" fill="black" x="191.5" y="17">链接</tspan>
+            </text>
+          </g>
+          <g id="Graphic_12">
+            <rect x="-846.6862" y="4298.385" width="100.74101" height="50.85826" fill="#c0ffff"/>
+            <rect x="-846.6862" y="4298.385" width="100.74101" height="50.85826" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+            <text transform="translate(-841.6862 4301.8143)" fill="black">
+              <tspan font-family="PingFang SC" font-size="16" font-weight="400" fill="black" x="29.370505" y="17">验证</tspan>
+              <tspan font-family="PingFang SC" font-size="16" font-weight="400" fill="black" x="3.0905046" y="39">Verification</tspan>
+            </text>
+          </g>
+          <g id="Graphic_11">
+            <rect x="-702.6549" y="4298.385" width="100.74101" height="50.85826" fill="#c0ffff"/>
+            <rect x="-702.6549" y="4298.385" width="100.74101" height="50.85826" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+            <text transform="translate(-697.6549 4301.8143)" fill="black">
+              <tspan font-family="PingFang SC" font-size="16" font-weight="400" fill="black" x="29.370505" y="17">准备</tspan>
+              <tspan font-family="PingFang SC" font-size="16" font-weight="400" fill="black" x="2.2745046" y="39">Preparation</tspan>
+            </text>
+          </g>
+          <g id="Graphic_10">
+            <rect x="-558.62355" y="4298.385" width="100.74101" height="50.85826" fill="#c0ffff"/>
+            <rect x="-558.62355" y="4298.385" width="100.74101" height="50.85826" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+            <text transform="translate(-553.62355 4301.8143)" fill="black">
+              <tspan font-family="PingFang SC" font-size="16" font-weight="400" fill="black" x="29.370505" y="17">解析</tspan>
+              <tspan font-family="PingFang SC" font-size="16" font-weight="400" fill="black" x="6.386505" y="39">Resolution</tspan>
+            </text>
+          </g>
+        </g>
+        <g id="Graphic_9">
+          <rect x="-408.5235" y="4298.385" width="100.74101" height="50.85826" fill="#c0ffff"/>
+          <rect x="-408.5235" y="4298.385" width="100.74101" height="50.85826" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+          <text transform="translate(-403.5235 4301.8143)" fill="black">
+            <tspan font-family="PingFang SC" font-size="16" font-weight="400" fill="black" x="21.370505" y="17">初始化</tspan>
+            <tspan font-family="PingFang SC" font-size="16" font-weight="400" fill="black" x="1.2505046" y="39">Initialization</tspan>
+          </text>
+        </g>
+        <g id="Line_8">
+          <line x1="-889.9765" y1="4323.8143" x2="-856.5862" y2="4323.8143" marker-end="url(#FilledArrow_Marker)" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+        </g>
+        <g id="Line_7">
+          <line x1="-745.9452" y1="4323.8143" x2="-712.5549" y2="4323.8143" marker-end="url(#FilledArrow_Marker)" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+        </g>
+        <g id="Line_6">
+          <line x1="-601.91386" y1="4323.8143" x2="-568.52355" y2="4323.8143" marker-end="url(#FilledArrow_Marker)" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+        </g>
+        <g id="Line_5">
+          <line x1="-457.88254" y1="4323.8143" x2="-418.4235" y2="4323.8143" marker-end="url(#FilledArrow_Marker)" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+        </g>
+      </g>
+      <g id="Line_3">
+        <line x1="-367.66067" y1="4359.2017" x2="-434.678" y2="4442.3624" marker-end="url(#FilledArrow_Marker)" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+      </g>
+      <g id="Line_2">
+        <line x1="-541.6311" y1="4450.071" x2="-618.7163" y2="4450.071" marker-end="url(#FilledArrow_Marker)" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+      </g>
+    </g>
+  </g>
+</svg>
