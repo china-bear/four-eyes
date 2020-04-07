@@ -1,4 +1,4 @@
-[TOC]
+## 插件化开发基础篇—classloader
 
 ### 1. 什么是类加载？
 
@@ -304,14 +304,15 @@ public final class ServiceLoader<S> implements Iterable<S> {
     }
 }
 ```
-详情请参考下篇《利用SPI进行插件化开发》。
-
 <img src="./img/ThreadContextClassLoader.png" alt="图片替换文本" width="600" height="400" align="bottom" />
 
 ​																	图三：ThreadContextClassLoader
 
+### 6. 命名空间
+
+在JVM中，即使两个class对象来源同一个Class文件，被同一个虚拟机所加载，但只要加载它们的ClassLoader实例对象不同，那么这两个类对象也是不相等的。那么一个进程中有诸多类加载器加载的class，这些class对象是完全隔离的吗？满足怎样的条件才能互相引用？请看
+
 > 参考：
->
 > https://blog.csdn.net/javazejian/article/details/73413292
->
 > https://juejin.im/post/5e3cd9cee51d4527214ba232
+> https://www.runoob.com/w3cnote/java-class-forname.html
