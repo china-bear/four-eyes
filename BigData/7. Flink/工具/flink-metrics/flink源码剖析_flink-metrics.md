@@ -14,17 +14,15 @@ categories:
 
 ## flink-metrics-core
 
-- Metric：
+1. Metric
+常见的指标类型有Gauge、Count、Meter、Histogram，flink 自定义了 Metric 类。
 ![](./img/Metric类图.png)
 
-指标类型有Gauge、Count、Meter、Histogram。
-
-- MetricConfig：
+2. MetricConfig
+存取flink指标相关配置的工具类，继承Properties，添加了直接读取string、int、long、float、double、boolean配置值的方法。
 ![](./img/MetricConfig类图.png)
 
-- MetricGroup：
-![](./img/MetricGroup类图.png)
-
+3. MetricGroup
 Metric 在 flink 内部以 Group 的方式组织，有多层结构，Metric Group + Metric Name 是 Metric 的唯一标识。
 
 ```
@@ -39,14 +37,14 @@ TaskManagerMetricGroup
     •JobManagerJobMetricGroup
 ```
 
-可以根据需要埋点自定义指标。
-- 添加一个统计脏数据的指标，指标名为flink_taskmanager_job_task_operator_dtDirtyData ：
+   可以根据需要埋点自定义指标：
+* 添加一个统计脏数据的指标，指标名为flink_taskmanager_job_task_operator_dtDirtyData ：
 ```java
 // 从 RichFunction 中 getRuntimeContext() 
 dirtyDataCounter = runtimeContext.getMetricGroup().counter(MetricConstant.DT_DIRTY_DATA_COUNTER);
 ```
 
-- 添加一个消费延迟指标，自定了两层Group，分别是topic、partition，指标名为flink_taskmanager_job_task_operator_topic_partition_dtTopicPartitionLag ：
+* 添加一个消费延迟指标，自定了两层Group，分别是topic、partition，指标名为flink_taskmanager_job_task_operator_topic_partition_dtTopicPartitionLag ：
 ```java
 for(TopicPartition topicPartition : assignedPartitions){
     MetricGroup metricGroup = getRuntimeContext().getMetricGroup().addGroup(DT_TOPIC_GROUP, topicPartition.topic())
@@ -55,9 +53,13 @@ for(TopicPartition topicPartition : assignedPartitions){
 }
 ```
 
-- MetricReporter：
-![](./img/MetricReporter类图.png)
+MetricGroup通过继承实现多层结构：
+![](./img/MetricGroup类图.png)
+
+
+4. MetricReporter
 flink 内置了多种指标 reporter ，如jmx、slf4j、graphite、prometheus、influxdb、statsd、datadog等。
+![](./img/MetricReporter类图.png)
 
 
 ## 指标 Reporters
@@ -89,7 +91,7 @@ private final Map<Histogram, String> histograms = new HashMap<>();
 private final Map<Meter, String> meters = new HashMap<>();
 
 /**
- * 添加指标，添加指标，需要将flink内部的Metric转换成dropwizard中的Metric，
+ * 添加指标，需要将flink内部的Metric转换成dropwizard中的Metric，
  * 再注册到 dropwizard 的 MetricRegistry 中
  */
 @Override
@@ -130,7 +132,7 @@ public void notifyOfAddedMetric(Metric metric, String metricName, MetricGroup gr
 }
 
 /**
- * report 时直接从 dropwizard 的 MetricRegistry 中捞取所有指标，执行 ScheduledReporter 的 report 方法
+ * report 时直接从 dropwizard 内部的 MetricRegistry 中捞取所有指标，执行 ScheduledReporter 的 report 方法
  */
 @Override
 public void report() {
@@ -475,12 +477,30 @@ metrics.reporter.influxdb.retentionPolicy: one_hour # (optional) InfluxDB retent
 
 #### prometheus基本概念
 
+这里先附上Prometheus官网架构图：
+![](./img/Prometheus官网架构图.png)
+
+- Prometheus server 
+负责数据的采集和存储，定期从配置好的 jobs/exporters 中拉取 metrics，或者从 Pushgateway 中拉取，或者从其他的 Prometheus server 中拉取。
+Prometheus 是一个时序数据库，将采集到的监控数据按照时间序列的方式存储到本地磁盘。
+
+-Pushgateway
+支持临时性job主动推送指标的中间网关。
+
+- PromQL
+[PromQL使用方法](https://yunlzheng.gitbook.io/prometheus-book/parti-prometheus-ji-chu/promql/prometheus-query-language)
+
+- PromDash
+如Grafana，用于可视化指标数据。
+
+- WebUI
+9090提供图形化界面功能。
 
 
 #### Reporter实现
 
 Prometheus Reporter的详细类图如下，包括继承以及依赖关系：
-![](PrometheusReporter类图.png)
+![](./img/PrometheusReporter类图.png)
 
 - AbstractPrometheusReporter
 ```java
@@ -1042,87 +1062,89 @@ metrics.reporter.dghttp.proxyPort: 8080               #(optional) The proxy port
 
 ## flink中的指标项
 
-在看 flink 指标项时，可以
+flink 指标项时，可以大致分Overview、Checkpoint、Watermark、BackPressure、Kafka Connector、JVM等几块，集成到产品中可以是一页指标大盘。
 
 ### Overview
 
-| 指标名                                                                       |  
-| :------------------------------------------------------------------------- | 
-|  flink_taskmanager_job_task_operator_dtNumBytesIn                           | 
-|  flink_taskmanager_job_task_operator_dtNumBytesInRate                       | 
-|  flink_taskmanager_job_task_operator_dtNumRecordsIn                         | 
-|  flink_taskmanager_job_task_operator_dtNumRecordsInRate                     | 
-|  flink_taskmanager_job_task_operator_dtNumRecordsInResolve                  | 
-|  flink_taskmanager_job_task_operator_dtNumRecordsInResolveRate              | 
-|  flink_taskmanager_job_task_operator_dtNumRecordsOut                        | 
-|  flink_taskmanager_job_task_operator_dtNumRecordsOutRate                    | 
-|  flink_taskmanager_job_task_operator_dtDirtyData                            | 
-|  flink_taskmanager_job_task_operator_topic_partition_dtTopicPartitionLag    | 
-|  flink_taskmanager_job_task_operator_dtEventDelay                           | 
+其中，dt开头的是自定义指标。
+
+| 指标名                                                                       |
+| :------------------------------------------------------------------------- |
+|  flink_taskmanager_job_task_operator_dtNumBytesIn                           |
+|  flink_taskmanager_job_task_operator_dtNumBytesInRate                       |
+|  flink_taskmanager_job_task_operator_dtNumRecordsIn                         |
+|  flink_taskmanager_job_task_operator_dtNumRecordsInRate                     |
+|  flink_taskmanager_job_task_operator_dtNumRecordsInResolve                  |
+|  flink_taskmanager_job_task_operator_dtNumRecordsInResolveRate              |
+|  flink_taskmanager_job_task_operator_dtNumRecordsOut                        |
+|  flink_taskmanager_job_task_operator_dtNumRecordsOutRate                    |
+|  flink_taskmanager_job_task_operator_dtDirtyData                            |
+|  flink_taskmanager_job_task_operator_topic_partition_dtTopicPartitionLag    |
+|  flink_taskmanager_job_task_operator_dtEventDelay                           |
 
 
 ### Checkpoint 
 
-| 指标名                                                |  
-| :-------------------------------------------------- | 
-|  flink_jobmanager_job_lastCheckpointDuration         | 
-|  flink_jobmanager_job_lastCheckpointSize             | 
-|  flink_jobmanager_job_numberOfFailedCheckpoints      | 
+| 指标名                                                |
+| :-------------------------------------------------- |
+|  flink_jobmanager_job_lastCheckpointDuration         |
+|  flink_jobmanager_job_lastCheckpointSize             |
+|  flink_jobmanager_job_numberOfFailedCheckpoints      |
 
 ### Watermark
 
-| 指标名                                                       |                                                                                          
-| --------------------------------------------------------- | 
-|  flink_taskmanager_job_task_operator_currentInputWatermark  | 
-|  flink_taskmanager_job_task_operator_currentOutputWatermark | 
-|  flink_taskmanager_job_task_operator_numLateRecordsDropped  | 
+| 指标名                                                       |
+| --------------------------------------------------------- |
+|  flink_taskmanager_job_task_operator_currentInputWatermark  |
+|  flink_taskmanager_job_task_operator_currentOutputWatermark |
+|  flink_taskmanager_job_task_operator_numLateRecordsDropped  |
 
 
 ### BackPressure
 
-| 指标名                                                                       |  
-| ------------------------------------------------------------------------- | 
-|  flink_taskmanager_job_task_buffers_inPoolUsage                             | 
-|  flink_taskmanager_job_task_buffers_outPoolUsage                            | 
-|  flink_taskmanager_job_task_buffers_inputQueueLength                        | 
-|  flink_taskmanager_job_task_buffers_outputQueueLength                       | 
+| 指标名                                                                       |
+| ------------------------------------------------------------------------- |
+|  flink_taskmanager_job_task_buffers_inPoolUsage                             |
+|  flink_taskmanager_job_task_buffers_outPoolUsage                            |
+|  flink_taskmanager_job_task_buffers_inputQueueLength                        |
+|  flink_taskmanager_job_task_buffers_outputQueueLength                       |
 
 
 ### Kafka Connector
 
-| 指标名                                                                             |  
-| ------------------------------------------------------------------------------- | 
-|  flink_taskmanager_job_task_operator_commitsFailed                                | 
-|  flink_taskmanager_job_task_operator_KafkaConsumer_topic_partition_currentOffsets | 
-|  flink_taskmanager_job_task_operator_KafkaConsumer_records_lag_max                | 
+| 指标名                                                                             |
+| ------------------------------------------------------------------------------- |
+|  flink_taskmanager_job_task_operator_commitsFailed                                |
+|  flink_taskmanager_job_task_operator_KafkaConsumer_topic_partition_currentOffsets |
+|  flink_taskmanager_job_task_operator_KafkaConsumer_records_lag_max                |
 
 
 ### JVM
 
-| 指标名                                                                             |  
-| ------------------------------------------------------------------------------- | 
-|  flink_jobmanager_Status_JVM_CPU_Load                                             |                      
-|  flink_jobmanager_Status_JVM_CPU_Time                                             |                     
-|  flink_jobmanager_Status_JVM_GarbageCollector_PS_MarkSweep_Count                  |                   
-|  flink_jobmanager_Status_JVM_GarbageCollector_PS_MarkSweep_Time                   |                   
-|  flink_jobmanager_Status_JVM_GarbageCollector_PS_Scavenge_Count                   |            
-|  flink_jobmanager_Status_JVM_GarbageCollector_PS_Scavenge_Time                    |         
-|  flink_jobmanager_Status_JVM_Memory_Heap_Max                                      |                         
-|  flink_jobmanager_Status_JVM_Memory_Heap_Used                                     |                    
-|  flink_jobmanager_Status_JVM_Memory_NonHeap_Max                                   |            
-|  flink_jobmanager_Status_JVM_Memory_NonHeap_Used                                  |                         
-|  flink_jobmanager_Status_JVM_Threads_Count                                        |                               
-|  flink_taskmanager_Status_JVM_CPU_Load                                            |                      
-|  flink_taskmanager_Status_JVM_CPU_Time                                            |                    
-|  flink_taskmanager_Status_JVM_GarbageCollector_G1_Old_Generation_Count            |                    
-|  flink_taskmanager_Status_JVM_GarbageCollector_G1_Old_Generation_Time             |                   
-|  flink_taskmanager_Status_JVM_GarbageCollector_G1_Young_Generation_Count          |             
-|  flink_taskmanager_Status_JVM_GarbageCollector_G1_Young_Generation_Time           |        
-|  flink_taskmanager_Status_JVM_Memory_Heap_Max                                     |                         
-|  flink_taskmanager_Status_JVM_Memory_Heap_Used                                    |                    
-|  flink_taskmanager_Status_JVM_Memory_NonHeap_Max                                  |           
-|  flink_taskmanager_Status_JVM_Memory_NonHeap_Used                                 |                       
-|  flink_taskmanager_Status_JVM_Threads_Count                                       |                               
+| 指标名                                                                             |
+| ------------------------------------------------------------------------------- |
+|  flink_jobmanager_Status_JVM_CPU_Load                                             |
+|  flink_jobmanager_Status_JVM_CPU_Time                                             |
+|  flink_jobmanager_Status_JVM_GarbageCollector_PS_MarkSweep_Count                  |
+|  flink_jobmanager_Status_JVM_GarbageCollector_PS_MarkSweep_Time                   |
+|  flink_jobmanager_Status_JVM_GarbageCollector_PS_Scavenge_Count                   |
+|  flink_jobmanager_Status_JVM_GarbageCollector_PS_Scavenge_Time                    |
+|  flink_jobmanager_Status_JVM_Memory_Heap_Max                                      |
+|  flink_jobmanager_Status_JVM_Memory_Heap_Used                                     |
+|  flink_jobmanager_Status_JVM_Memory_NonHeap_Max                                   |
+|  flink_jobmanager_Status_JVM_Memory_NonHeap_Used                                  |
+|  flink_jobmanager_Status_JVM_Threads_Count                                        |
+|  flink_taskmanager_Status_JVM_CPU_Load                                            |
+|  flink_taskmanager_Status_JVM_CPU_Time                                            |
+|  flink_taskmanager_Status_JVM_GarbageCollector_G1_Old_Generation_Count            |
+|  flink_taskmanager_Status_JVM_GarbageCollector_G1_Old_Generation_Time             |
+|  flink_taskmanager_Status_JVM_GarbageCollector_G1_Young_Generation_Count          |
+|  flink_taskmanager_Status_JVM_GarbageCollector_G1_Young_Generation_Time           |
+|  flink_taskmanager_Status_JVM_Memory_Heap_Max                                     |
+|  flink_taskmanager_Status_JVM_Memory_Heap_Used                                    |
+|  flink_taskmanager_Status_JVM_Memory_NonHeap_Max                                  |
+|  flink_taskmanager_Status_JVM_Memory_NonHeap_Used                                 |
+|  flink_taskmanager_Status_JVM_Threads_Count                                       |
 
 
 ## 指标平台化实践
