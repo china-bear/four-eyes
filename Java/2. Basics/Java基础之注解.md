@@ -25,6 +25,8 @@
 
 负责注解的创建，是注解的注解。
 
+![](./annotation_img/Annotation元注解类图.png)
+
 1. @Target
 
 表示注解可以用在什么地方。ElementType可以是：
@@ -166,6 +168,8 @@ public interface Annotation {
     Class<? extends Annotation> annotationType();
 }
 ```
+
+![](./annotation_img/JDK内置注解.png)
 
 1. @Override
 
