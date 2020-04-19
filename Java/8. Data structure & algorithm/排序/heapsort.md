@@ -12,9 +12,15 @@
 
 数组
 
-### 堆调整
+### siftdown
 
-堆调整又名heapify，以大顶堆为例，大顶堆的堆调整即将左右子树中较大者的值与父节点的值对换，递归进行该过程,使得当前树满足`arr[i] >= arr[2i+1] && arr[i] >= arr[2i+2]`
+siftdown又称为堆调整，以大顶堆siftdown为例，即将左右子树中较大者的值与父节点的值对换，递归进行该过程,使得以当前节点为根的子树满足`arr[i] >= arr[2i+1] && arr[i] >= arr[2i+2]`
+
+### heapify
+
+从树的第一个非叶节点开始往前遍历，对每一个非叶节点执行堆调整，使得整棵树满足`arr[i] >= arr[2i+1] && arr[i] >= arr[2i+2]`
+
+> siftup时间复杂度相对siftdown更高，本文暂不介绍siftup以及基于siftup的heapify，详情可参考[siftup与siftdown的时间复杂度](https://blog.csdn.net/lighthear/article/details/79945528?utm_source=blogxgwz6)
 
 ### 步骤
 
@@ -48,7 +54,7 @@
 
 <img src="./img/heapsort5.png" height="300" width="300"/>
 
-2. 从堆顶开始重新heapify，使其继续满足堆定义
+2. 从堆顶开始重新siftdown，使其继续满足堆定义
 
 <img src="./img/heapsort6.png" height="300" width="300"/>
 
@@ -70,25 +76,25 @@ public class HeapSort{
         // 对arr进行拷贝，不改变参数内容
         int[] arr = Arrays.copyOf(sourceArray, sourceArray.length);
         int len = arr.length;
-        buildMaxHeap(arr, len);
-		    // 最大值拿出来，放到堆的最后一位，然后对长度为len-1的堆重新heapify
+        heapify(arr, len);
+		    // 最大值拿出来，放到堆的最后一位，然后对长度为len-1的堆重新siftdown
         for (int i = len - 1; i > 0; i--) {
-            // 思考1：此处为什么不需要再走一次buildMaxHeap？
+            // 思考1：此处为什么不需要再走一次heapify？
             swap(arr, 0, i);
             len--;
-            heapify(arr, 0, len);
+            siftdown(arr, 0, len);
         }
         return arr;
     }
-	// 从最后一个叶子节点的父亲节点开始，往前遍历所有节点，并针对每个节点进行heapify
-  // 思考2：为什么要有这一步？是否可以从i=0进行heapify操作以取代这一步遍历操作？
-    private void buildMaxHeap(int[] arr, int len) {
+	// 从最后一个叶子节点的父亲节点开始，往前遍历所有节点，并针对每个节点进行siftdown
+  // 思考2：为什么要有这一步？是否可以从i=0进行siftdown操作以取代这一步遍历操作？
+    private void heapify(int[] arr, int len) {
         for (int i = (int) Math.floor(len / 2)-1; i >= 0; i--) {
-            heapify(arr, i, len);
+            siftdown(arr, i, len);
         }
     }
-	//heapify：将左右子树中较大者的值与父节点的值对换，递归进行该过程,使得子节点永远小于父节点
-    private void heapify(int[] arr, int i, int len) {
+	//siftdown：将左右子树中较大者的值与父节点的值对换，递归进行该过程,使得子节点永远小于父节点
+    private void siftdown(int[] arr, int i, int len) {
         int left = 2 * i + 1;
         int right = 2 * i + 2;
         int largest = i;
@@ -104,7 +110,7 @@ public class HeapSort{
         if (largest != i) {
             swap(arr, i, largest);
             //递归条件：因arr[largest]和arr[i]的值进行了对调，无法判断arr[largest]上的当前值是否比子树的值要大，因此要进行递归对比
-            heapify(arr, largest, len);
+            siftdown(arr, largest, len);
         }
     }
 
@@ -123,14 +129,14 @@ public class HeapSort{
 
 #### 思路
 
-10亿个数无法在有限的内存中进行存储，因此内存中只能存放有限的数据。我们考虑在内存中维护一个1000个数的数组，并构建小顶堆。从文件中一次读取剩余元素，分别于小顶堆的堆顶元素进行对比，如果小于堆顶元素，则丢弃；如果大于堆顶元素，则赋值给堆顶元素，并从堆顶开始进行重新heapify。
-假设是从N个数据中找出前M大的数，一次heapify的时间复杂度为`logM`，则整个计算过程的时间复杂度是`NlogM`
+10亿个数无法在有限的内存中进行存储，因此内存中只能存放有限的数据。我们考虑在内存中维护一个1000个数的数组，并构建小顶堆。从文件中一次读取剩余元素，分别于小顶堆的堆顶元素进行对比，如果小于堆顶元素，则丢弃；如果大于堆顶元素，则赋值给堆顶元素，并从堆顶开始进行重新siftdown。
+假设是从N个数据中找出前M大的数，一次siftdown的时间复杂度为`logM`，则整个计算过程的时间复杂度是`NlogM`
 
 #### 代码
 
 ```java
 public class Heapsort {
-    private void heapify(int[] arr, int i, int len) {
+    private void siftdown(int[] arr, int i, int len) {
         int left = 2 * i + 1;
         int right = 2 * i + 2;
         int smallest = i;
@@ -145,7 +151,7 @@ public class Heapsort {
 
         if (smallest != i) {
             swap(arr, i, smallest);
-            heapify(arr, smallest, len);
+            siftdown(arr, smallest, len);
         }
     }
 
@@ -155,22 +161,22 @@ public class Heapsort {
         arr[j] = temp;
     }
 
-    private void buildMinHeap(int[] arr, int len) {
+    private void heapify(int[] arr, int len) {
         for (int i = (int) Math.floor(len / 2)-1; i >= 0; i--) {
-            heapify(arr, i, len);
+            siftdown(arr, i, len);
         }
     }
 
     // 寻找topN，该方法改变data，将topN排到最前面
     public void findTopN(int n, int[] data) {
         // 先构建n个数的小顶堆
-        buildMinHeap(data, n);
+        heapify(data, n);
         // n往后的数进行调整
         for (int j=n; j<data.length; j++){
             if (data[j] < data[0])
                 continue;
             swap(data, j, 0);
-            heapify(data, 0, n);
+            siftdown(data, 0, n);
         }
     }
 
