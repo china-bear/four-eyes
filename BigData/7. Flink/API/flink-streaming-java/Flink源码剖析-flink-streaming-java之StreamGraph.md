@@ -27,7 +27,7 @@ API 到 StreamGraph 的构建过程。
 
 3. 如何操作转换数据？
 
-![](./img/DataStream_API操作概览.png)
+![](img_streamgraph/DataStream_API操作概览.png)
 
 - Basic Transformations
   map、filter、flatMap
@@ -36,19 +36,19 @@ API 到 StreamGraph 的构建过程。
 - MultiStream Transformations
   union、connect、coMap、coFlatMap、split、select
 
-![](./img/DataStream基本转换.png)
+![](img_streamgraph/DataStream基本转换.png)
 
 - Distribution Transformations
 物理分组：
 
 | 关系                    |   表示               |  图示   |  
 | ----------------------- | ------------------- | ------- | 
-| global                  |   全部发往第1个task                     |  ![](./img/物理分组_global.png)   | 
-| broadcast               |   广播，复制上游的数据发送到所有下游节点    |  ![](./img/物理分组_broadcast.png)   | 
-| forward                 |   上下游并发度一样时一对一发送            |  ![](./img/物理分组_forward.png)   | 
-| shuffle                 |   随机均匀分配                          |  ![](./img/物理分组_shuffle.png)   | 
-| reblance                |   Round-Robin（轮流分配）               |  ![](./img/物理分组_reblance.png)   | 
-| rescale                 |   Local Round-Robin (本地轮流分配)，</br>只会看到本机的实例  |  ![](./img/物理分组_rescale.png)  | 
+| global                  |   全部发往第1个task                     |  ![](img_streamgraph/物理分组_global.png)   | 
+| broadcast               |   广播，复制上游的数据发送到所有下游节点    |  ![](img_streamgraph/物理分组_broadcast.png)   | 
+| forward                 |   上下游并发度一样时一对一发送            |  ![](img_streamgraph/物理分组_forward.png)   | 
+| shuffle                 |   随机均匀分配                          |  ![](img_streamgraph/物理分组_shuffle.png)   | 
+| reblance                |   Round-Robin（轮流分配）               |  ![](img_streamgraph/物理分组_reblance.png)   | 
+| rescale                 |   Local Round-Robin (本地轮流分配)，</br>只会看到本机的实例  |  ![](img_streamgraph/物理分组_rescale.png)  | 
 | partitionCustom         |   自定义单播                |    | 
 
 
@@ -140,14 +140,14 @@ public class WordCount {
 
 StreamExecutionEnvironment 是 Flink 流处理任务执行的上下文，是我们编写 Flink 程序的入口。根据执行环境的不同，选择不同的 StreamExecutionEnvironment 类，
 有 LocalStreamEnvironment、RemoteStreamEnvironment 等。如下图：
-![](./img/StreamExecutionEnvironment子类.png)
+![](img_streamgraph/StreamExecutionEnvironment子类.png)
 
 StreamExecutionEnvironment 依赖 ExecutionConfig 类来设置并行度等，依赖 CheckpointConfig 设置 Checkpointing 等相关属性。
-![](./img/StreamExecutionEnvironment类图.png)
+![](img_streamgraph/StreamExecutionEnvironment类图.png)
 
 
 这里再补充说明下 StreamExecutionEnvironment类中的重要属性和方法：
-![](./img/StreamExecutionEnvironment类中的重要属性和方法.png)
+![](img_streamgraph/StreamExecutionEnvironment类中的重要属性和方法.png)
 
 
 ### Transformation
@@ -158,11 +158,11 @@ Transformation 代表了从一个或多个 DataStream 生成新 DataStream 的�
 
 Transformation 有很多子类，如 SourceTransformation、OneInputTransformation、TwoInputTransformation、SideOutputTransformation 等，分别对应了 DataStream 上的不同转换操作。
 
-![](./img/Transformation子类.png)
+![](img_streamgraph/Transformation子类.png)
 
 每一个 Transformation 都有一个关联 id，这个 id 是全局递增的，还有 uid、slotSharingGroup、parallelism 等信息。
 
-![](./img/Transformation类中的重要属性.png)
+![](img_streamgraph/Transformation类中的重要属性.png)
 
 查看 Transformation 的其中两个子类 OneInputTransformation、TwoInputTransformation 的实现，都对应有输入 Transformation，也正是基于此才能还原出 DAG 的拓扑结构。
 
@@ -215,13 +215,13 @@ Transformations 组成的 graph ，也就是我们写代码时的图结构如下
 
 DataStream 的子类包括 DataStreamSource、KeyedStream、IterativeStream、SingleOutputStreamOperator。
 
-![](./img/DataStream子类.png)
+![](img_streamgraph/DataStream子类.png)
 
 除了 DataStream 及其子类以外，其它的表征数据流的类还有 ConnectedStreams、WindowedStream、AllWindowedStream，这些会在后续的文章中陆续介绍。
 
 DataStream 类中的重要属性和方法：
 
-![](./img/DataStream类中的重要属性和方法.png)
+![](img_streamgraph/DataStream类中的重要属性和方法.png)
 
 
 下面我们看下 map 操作是如何被添加进来的：
@@ -279,11 +279,11 @@ protected <R> SingleOutputStreamOperator<R> doTransform(
 
 StreamOperator 的类继承关系如下：
 
-![](./img/StreamOperator子类.png)
+![](img_streamgraph/StreamOperator子类.png)
 
 接口 StreamOpertor 定义了对一个具体的算子的生命周期的管理。StreamOperator 的两个子接口 OneInputStreamOperator 和 TwoInputStreamOperator 提供了数据流中具体元素的操作方法，而 AbstractUdfStreamOperator 抽象子类则提供了自定义处理函数对应的算子的基本实现：
 
-![](./img/StreamOperator类中的重要属性和方法.png)
+![](img_streamgraph/StreamOperator类中的重要属性和方法.png)
 
 下面我们还是拿 map 举例，map 操作对应的 StreamOperator 为 StreamMap ，继承了 AbstractUdfStreamOperator 类，实现了 OneInputStreamOperator 接口：
 ```java
@@ -312,7 +312,7 @@ public class StreamMap<IN, OUT>
 
 ### Function
 
-![](./img/Function子类.png)
+![](img_streamgraph/Function子类.png)
 
 
 ### StreamGraph
@@ -596,7 +596,7 @@ StreamGraph 是 Flink 任务最接近用户逻辑的 DAG 表示，后面到具�
 
 ### 类之间的层级关系
 
-![](./img/DataStream_API类之间的层级关系.png)
+![](img_streamgraph/DataStream_API类之间的层级关系.png)
 
 map 转换将用户自定义函数 MapFunction 包装到 StreamMap 这个 StreamOperator 中，再将 StreamMap 包装到 OneInputTransformation，最后该 transformation 会存到 
 StreamExecutionEnvironment 中。当调用 env.execute() 时，会遍历其中的 transformations 集合构造出 StreamGraph 。
