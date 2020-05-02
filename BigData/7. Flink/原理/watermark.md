@@ -412,3 +412,9 @@ djg@djgdeMacBook-Pro bin % nc -l 9999
 ![watermark14](./img/watermark14.png)
 
 数据落位图
+
+> 参考
+>
+> https://blog.csdn.net/sghuu/article/details/103704415
+>
+> https://miaowenting.site/2019/10/19/Apache-Flink/
