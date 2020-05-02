@@ -585,6 +585,7 @@ private void addEdgeInternal(Integer upStreamVertexID,
 		// 分别将 StreamEdge 添加到上游节点和下游节点
 		// 获取上游节点，添加 OutEdge
 		getStreamNode(edge.getSourceId()).addOutEdge(edge);
+		// 获取下游节点，添加 InEdge
 		getStreamNode(edge.getTargetId()).addInEdge(edge);
 	}
 }
