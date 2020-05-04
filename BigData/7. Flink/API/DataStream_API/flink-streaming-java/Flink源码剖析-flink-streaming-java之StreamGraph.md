@@ -64,6 +64,8 @@ DataStream 通过不同的算子不停地在 DataStream 上实现转换过滤等
 - execute()：JobExecutionResult
 
 
+### 自带 WordCount 代码示例
+
 我们看下基于 Flink DataStream API 的自带 WordCount 示例：实时统计单词数量，每来一个计算一次并输出一次。
 
 ```java
@@ -208,6 +210,9 @@ Transformations 组成的 graph ，也就是我们写代码时的图结构如下
               Sink
 ```
 
+通过源码也可以发现，UnionTransformation、SplitTransformation、SelectTransformation、PartitionTransformation 由于不包含具体的操作，
+所以都没有 StreamOperator 成员变量，而其他的 Transformation 子类基本都有。
+
 ### DataStream
 
 一个 DataStream 就代表了同一种类型元素构成的数据流。通过对 DataStream 应用 map/filter 等操作，就可以将一个 DataStream 转换成另一个 DataStream 。
@@ -226,49 +231,56 @@ DataStream 类中的重要属性和方法：
 
 下面我们看下 map 操作是如何被添加进来的：
 ```java
-public <R> SingleOutputStreamOperator<R> map(MapFunction<T, R> mapper, TypeInformation<R> outputType) {
-	// 将 MapFunction 封装成 StreamMap 这个 StreamOperator
-	return transform("Map", outputType, new StreamMap<>(clean(mapper)));
+public class DataStream {
+    public <R> SingleOutputStreamOperator<R> map(MapFunction<T, R> mapper, TypeInformation<R> outputType) {
+	    // 将 MapFunction 封装成 StreamMap 这个 StreamOperator
+	    return transform("Map", outputType, new StreamMap<>(clean(mapper)));
+    }
 }
 ```
 
 ```java
-@PublicEvolving
-public <R> SingleOutputStreamOperator<R> transform(
-	String operatorName,
-	TypeInformation<R> outTypeInfo,
-	OneInputStreamOperator<T, R> operator) {
+public class DataStream {
+    @PublicEvolving
+    public <R> SingleOutputStreamOperator<R> transform(
+	    String operatorName,
+	    TypeInformation<R> outTypeInfo,
+	    OneInputStreamOperator<T, R> operator) {
 
-	return doTransform(operatorName, outTypeInfo, SimpleOperatorFactory.of(operator));
+	    return doTransform(operatorName, outTypeInfo, SimpleOperatorFactory.of(operator));
+    }
 }
 ```
 
 接着我们看下其中一个比较重要的方法 doTransform ：
 ```java
-protected <R> SingleOutputStreamOperator<R> doTransform(
-		String operatorName,
-		TypeInformation<R> outTypeInfo,
-		StreamOperatorFactory<R> operatorFactory) {
+public class DataStream {
 
-	// read the output type of the input Transform to coax out errors about MissingTypeInfo
-	transformation.getOutputType();
+    protected <R> SingleOutputStreamOperator<R> doTransform(
+		    String operatorName,
+		    TypeInformation<R> outTypeInfo,
+		    StreamOperatorFactory<R> operatorFactory) {
 
-	// 构造 Transformation
-	OneInputTransformation<T, R> resultTransform = new OneInputTransformation<>(
-			this.transformation,
-			operatorName,
-			operatorFactory,
-			outTypeInfo,
-			environment.getParallelism());
+	    // read the output type of the input Transform to coax out errors about MissingTypeInfo
+	    transformation.getOutputType();
 
-	// 将 Transformation 封装进 SingleOutputStreamOperator 返回
-	@SuppressWarnings({"unchecked", "rawtypes"})
-	SingleOutputStreamOperator<R> returnStream = new SingleOutputStreamOperator(environment, resultTransform);
+	    // 构造 Transformation
+	    OneInputTransformation<T, R> resultTransform = new OneInputTransformation<>(
+			    this.transformation,
+			    operatorName,
+			    operatorFactory,
+			    outTypeInfo,
+			    environment.getParallelism());
 
-	// 添加到 StreamExecutionEnvironment 的 transformations 列表中
-	getExecutionEnvironment().addOperator(resultTransform);
+	    // 将 Transformation 封装进 SingleOutputStreamOperator 返回
+	    @SuppressWarnings({"unchecked", "rawtypes"})
+	    SingleOutputStreamOperator<R> returnStream = new SingleOutputStreamOperator(environment, resultTransform);
 
-	return returnStream;
+	    // 添加到 StreamExecutionEnvironment 的 transformations 列表中
+	    getExecutionEnvironment().addOperator(resultTransform);
+
+	    return returnStream;
+    }
 }
 ```
 
@@ -322,150 +334,161 @@ StreamGraph 是在 Client 端构造的。
 
 首先看下 StreamGraphGenerator 的 generate() 方法，这个方法会由触发程序执行的方法 StreamExecutionEnvironment.execute() 调用到：
 ```java
-public StreamGraph generate() {
-	streamGraph = new StreamGraph(executionConfig, checkpointConfig, savepointRestoreSettings);
-	streamGraph.setStateBackend(stateBackend);
-	streamGraph.setChaining(chaining);
-	streamGraph.setScheduleMode(scheduleMode);
-	streamGraph.setUserArtifacts(userArtifacts);
-	streamGraph.setTimeCharacteristic(timeCharacteristic);
-	streamGraph.setJobName(jobName);
-	streamGraph.setBlockingConnectionsBetweenChains(blockingConnectionsBetweenChains);
+public class StreamGraphGenerator {
+    
+    public StreamGraph generate() {
+	    streamGraph = new StreamGraph(executionConfig, checkpointConfig, savepointRestoreSettings);
+	    streamGraph.setStateBackend(stateBackend);
+	    streamGraph.setChaining(chaining);
+	    streamGraph.setScheduleMode(scheduleMode);
+	    streamGraph.setUserArtifacts(userArtifacts);
+	    streamGraph.setTimeCharacteristic(timeCharacteristic);
+	    streamGraph.setJobName(jobName);
+	    streamGraph.setBlockingConnectionsBetweenChains(blockingConnectionsBetweenChains);
 
-	alreadyTransformed = new HashMap<>();
+	    alreadyTransformed = new HashMap<>();
 
-	/**
-	 * 遍历 transformations 列表，递归调用 transform 方法。
-	 * 对于每一个 Transformation ，确保当前上游已经完成转换，转换成 StreamGraph 中的 StreamNode，并为上下游节点添加 StreamEdge
-	 */
-	for (Transformation<?> transformation: transformations) {
-		transform(transformation);
-	}
+	    /**
+	    * 遍历 transformations 列表，递归调用 transform 方法。
+	    * 对于每一个 Transformation ，确保当前上游已经完成转换，转换成 StreamGraph 中的 StreamNode，并为上下游节点添加 StreamEdge
+	    */
+	    for (Transformation<?> transformation: transformations) {
+		    transform(transformation);
+	    }
 
-	final StreamGraph builtStreamGraph = streamGraph;
+	    final StreamGraph builtStreamGraph = streamGraph;
 
-	alreadyTransformed.clear();
-	alreadyTransformed = null;
-	streamGraph = null;
+	    alreadyTransformed.clear();
+	    alreadyTransformed = null;
+	    streamGraph = null;
 
-	return builtStreamGraph;
+	    return builtStreamGraph;
+    }
 }
 ```
 
 在遍历 List<Transformation> 生成 StreamGraph 时，会递归调用其 transform 方法。对于每一个 Transformation ，确保当前其上游已经完成转换。最终，部分 Transformation 节点被
 转换为 StreamGraph 中的 StreamNode 节点，并会为上下游节点添加边 StreamEdge。下面看下 transform() 方法：
 ```java
-private Collection<Integer> transform(Transformation<?> transform) {
+public class StreamGraphGenerator {
+    
+    private Collection<Integer> transform(Transformation<?> transform) {
 
-	if (alreadyTransformed.containsKey(transform)) {
-		return alreadyTransformed.get(transform);
-	}
+	    if (alreadyTransformed.containsKey(transform)) {
+		    return alreadyTransformed.get(transform);
+	    }
 
-	// 对于不同类型的 Transformation，分别调用对应的转换方法
-	// 只有 OneInputTransformation、TwoInputTransformation、SourceTransformation、SinkTransformation 会生成 StreamNode，
-	// 会生成 StreamNode.
-	// 像 Partitioning, split/select, union 这些是不包含物理转换操作的，会生成一个带有特定属性的虚拟节点，
-	// 当添加一条有虚拟节点指向下游节点的边时，会找到虚拟节点上游的物理节点，在两个物理节点之间添加边，并把虚拟转换操作的属性附着上去。
-	Collection<Integer> transformedIds;
-	if (transform instanceof OneInputTransformation<?, ?>) {
-		transformedIds = transformOneInputTransform((OneInputTransformation<?, ?>) transform);
-	} else if (transform instanceof TwoInputTransformation<?, ?, ?>) {
-		transformedIds = transformTwoInputTransform((TwoInputTransformation<?, ?, ?>) transform);
-	} else if (transform instanceof SourceTransformation<?>) {
-		transformedIds = transformSource((SourceTransformation<?>) transform);
-	} else if (transform instanceof SinkTransformation<?>) {
-		transformedIds = transformSink((SinkTransformation<?>) transform);
-	} else if (transform instanceof UnionTransformation<?>) {
-		transformedIds = transformUnion((UnionTransformation<?>) transform);
-	} else if (transform instanceof SplitTransformation<?>) {
-		transformedIds = transformSplit((SplitTransformation<?>) transform);
-	} else if (transform instanceof SelectTransformation<?>) {
-		transformedIds = transformSelect((SelectTransformation<?>) transform);
-	} else if (transform instanceof FeedbackTransformation<?>) {
-		transformedIds = transformFeedback((FeedbackTransformation<?>) transform);
-	} else if (transform instanceof CoFeedbackTransformation<?>) {
-		transformedIds = transformCoFeedback((CoFeedbackTransformation<?>) transform);
-	} else if (transform instanceof PartitionTransformation<?>) {
-		transformedIds = transformPartition((PartitionTransformation<?>) transform);
-	} else if (transform instanceof SideOutputTransformation<?>) {
-		transformedIds = transformSideOutput((SideOutputTransformation<?>) transform);
-	} else {
-		throw new IllegalStateException("Unknown transformation: " + transform);
-	}
+	    // 对于不同类型的 Transformation，分别调用对应的转换方法
+	    // 只有 OneInputTransformation、TwoInputTransformation、SourceTransformation、SinkTransformation 会生成 StreamNode，
+	    // 会生成 StreamNode.
+	    // 像 Partitioning, split/select, union 这些是不包含物理转换操作的，会生成一个带有特定属性的虚拟节点，
+	    // 当添加一条有虚拟节点指向下游节点的边时，会找到虚拟节点上游的物理节点，在两个物理节点之间添加边，并把虚拟转换操作的属性附着上去。
+	    Collection<Integer> transformedIds;
+	    if (transform instanceof OneInputTransformation<?, ?>) {
+		    transformedIds = transformOneInputTransform((OneInputTransformation<?, ?>) transform);
+	    } else if (transform instanceof TwoInputTransformation<?, ?, ?>) {
+		    transformedIds = transformTwoInputTransform((TwoInputTransformation<?, ?, ?>) transform);
+	    } else if (transform instanceof SourceTransformation<?>) {
+		    transformedIds = transformSource((SourceTransformation<?>) transform);
+	    } else if (transform instanceof SinkTransformation<?>) {
+		    transformedIds = transformSink((SinkTransformation<?>) transform);
+	    } else if (transform instanceof UnionTransformation<?>) {
+		    transformedIds = transformUnion((UnionTransformation<?>) transform);
+	    } else if (transform instanceof SplitTransformation<?>) {
+		    transformedIds = transformSplit((SplitTransformation<?>) transform);
+	    } else if (transform instanceof SelectTransformation<?>) {
+		    transformedIds = transformSelect((SelectTransformation<?>) transform);
+	    } else if (transform instanceof FeedbackTransformation<?>) {
+		    transformedIds = transformFeedback((FeedbackTransformation<?>) transform);
+	    } else if (transform instanceof CoFeedbackTransformation<?>) {
+		    transformedIds = transformCoFeedback((CoFeedbackTransformation<?>) transform);
+	    } else if (transform instanceof PartitionTransformation<?>) {
+		    transformedIds = transformPartition((PartitionTransformation<?>) transform);
+	    } else if (transform instanceof SideOutputTransformation<?>) {
+		    transformedIds = transformSideOutput((SideOutputTransformation<?>) transform);
+	    } else {
+		    throw new IllegalStateException("Unknown transformation: " + transform);
+	    }
 
-	return transformedIds;
+	    return transformedIds;
+    }
 }
 ```
 
 对于另外一部分 Transformation ，如 partitioning, split/select, union，并不包含真正的物理转换操作，是不会生成 StreamNode 的，而是生成一个带有特定属性的虚拟节点。
 当添加一条有虚拟节点指向下游节点的边时，会找到虚拟节点上游的物理节点，在两个物理节点之间添加边，并把虚拟转换操作的属性附着上去。下面我们首先看下 transformOneInputTransform() 方法：
 ```java
-private <IN, OUT> Collection<Integer> transformOneInputTransform(OneInputTransformation<IN, OUT> transform) {
+public class StreamGraphGenerator {
+    
+    private <IN, OUT> Collection<Integer> transformOneInputTransform(OneInputTransformation<IN, OUT> transform) {
 
-	// 首先确保上游节点完成转换
-	Collection<Integer> inputIds = transform(transform.getInput());
+	    // 首先确保上游节点完成转换
+	    Collection<Integer> inputIds = transform(transform.getInput());
 
-	// the recursive call might have already transformed this
-	// 由于是递归调用的，可能已经完成了转换
-	if (alreadyTransformed.containsKey(transform)) {
-		return alreadyTransformed.get(transform);
-	}
+	    // the recursive call might have already transformed this
+	    // 由于是递归调用的，可能已经完成了转换
+	    if (alreadyTransformed.containsKey(transform)) {
+		    return alreadyTransformed.get(transform);
+	    }
 
-	// 确定共享资源组，如果用户没有指定，默认是 default
-	String slotSharingGroup = determineSlotSharingGroup(transform.getSlotSharingGroup(), inputIds);
+	    // 确定共享资源组，如果用户没有指定，默认是 default
+	    String slotSharingGroup = determineSlotSharingGroup(transform.getSlotSharingGroup(), inputIds);
 
-	// 向 StreamGraph 中添加 Operator，这一步会生成对应的 StreamNode
-	streamGraph.addOperator(transform.getId(),
-			slotSharingGroup,
-			transform.getCoLocationGroupKey(),
-			transform.getOperatorFactory(),
-			transform.getInputType(),
-			transform.getOutputType(),
-			transform.getName());
+	    // 向 StreamGraph 中添加 Operator，这一步会生成对应的 StreamNode
+	    streamGraph.addOperator(transform.getId(),
+			    slotSharingGroup,
+			    transform.getCoLocationGroupKey(),
+			    transform.getOperatorFactory(),
+			    transform.getInputType(),
+			    transform.getOutputType(),
+			    transform.getName());
 
-	// 设置 stateKey
-	if (transform.getStateKeySelector() != null) {
-		TypeSerializer<?> keySerializer = transform.getStateKeyType().createSerializer(executionConfig);
-		streamGraph.setOneInputStateKey(transform.getId(), transform.getStateKeySelector(), keySerializer);
-	}
+	    // 设置 stateKey
+	    if (transform.getStateKeySelector() != null) {
+		    TypeSerializer<?> keySerializer = transform.getStateKeyType().createSerializer(executionConfig);
+		    streamGraph.setOneInputStateKey(transform.getId(), transform.getStateKeySelector(), keySerializer);
+	    }
 
-	// 设置 parallelism
-	int parallelism = transform.getParallelism() != ExecutionConfig.PARALLELISM_DEFAULT ?
-		transform.getParallelism() : executionConfig.getParallelism();
-	streamGraph.setParallelism(transform.getId(), parallelism);
-	streamGraph.setMaxParallelism(transform.getId(), transform.getMaxParallelism());
+	    // 设置 parallelism
+	    int parallelism = transform.getParallelism() != ExecutionConfig.PARALLELISM_DEFAULT ?
+		    transform.getParallelism() : executionConfig.getParallelism();
+	    streamGraph.setParallelism(transform.getId(), parallelism);
+	    streamGraph.setMaxParallelism(transform.getId(), transform.getMaxParallelism());
 
-	// 在每一个物理节点的转换上
-	// 依次连接到上游 input 节点，创建 StreamEdge，在输入节点和当前节点之间建立边的连接
-	for (Integer inputId: inputIds) {
-		streamGraph.addEdge(inputId, transform.getId(), 0);
-	}
+	    // 在每一个物理节点的转换上
+	    // 依次连接到上游 input 节点，创建 StreamEdge，在输入节点和当前节点之间建立边的连接
+	    for (Integer inputId: inputIds) {
+		    streamGraph.addEdge(inputId, transform.getId(), 0);
+	    }
 
-	return Collections.singleton(transform.getId());
+	    return Collections.singleton(transform.getId());
+    }
 }
 ```
 
 接着看下 StreamGraph 中对应的添加节点的方法：
 ```java
-public <IN, OUT> void addOperator(
-		Integer vertexID,
-		@Nullable String slotSharingGroup,
-		@Nullable String coLocationGroup,
-		StreamOperatorFactory<OUT> operatorFactory,
-		TypeInformation<IN> inTypeInfo,
-		TypeInformation<OUT> outTypeInfo,
-		String operatorName) {
+public class StreamGraph {
+    
+    public <IN, OUT> void addOperator(
+		    Integer vertexID,
+		    @Nullable String slotSharingGroup,
+		    @Nullable String coLocationGroup,
+		    StreamOperatorFactory<OUT> operatorFactory,
+		    TypeInformation<IN> inTypeInfo,
+		    TypeInformation<OUT> outTypeInfo,
+		    String operatorName) {
 
-		if (operatorFactory.isStreamSource()) {
-			// 从传入的 StreamOperatorFactory 得知当前 operator 代表的是 source 流。SourceStreamTask
-			addNode(vertexID, slotSharingGroup, coLocationGroup, SourceStreamTask.class, operatorFactory, operatorName);
-		} else {
-			// 上游节点输入流，OneInputStreamTask
-			addNode(vertexID, slotSharingGroup, coLocationGroup, OneInputStreamTask.class, operatorFactory, operatorName);
-		}
-}
+		    if (operatorFactory.isStreamSource()) {
+			    // 从传入的 StreamOperatorFactory 得知当前 operator 代表的是 source 流。SourceStreamTask
+			    addNode(vertexID, slotSharingGroup, coLocationGroup, SourceStreamTask.class, operatorFactory, operatorName);
+		    } else {
+			    // 上游节点输入流，OneInputStreamTask
+			    addNode(vertexID, slotSharingGroup, coLocationGroup, OneInputStreamTask.class, operatorFactory, operatorName);
+		    }
+    }
 
-protected StreamNode addNode(Integer vertexID,
+    protected StreamNode addNode(Integer vertexID,
 							@Nullable String slotSharingGroup,
 						    @Nullable String coLocationGroup,
 							// 表示该节点在 TM 中运行时的实际任务类型
@@ -473,64 +496,77 @@ protected StreamNode addNode(Integer vertexID,
 							StreamOperatorFactory<?> operatorFactory,
 							String operatorName) {
 
-	if (streamNodes.containsKey(vertexID)) {
-		throw new RuntimeException("Duplicate vertexID " + vertexID);
-	}
+	    if (streamNodes.containsKey(vertexID)) {
+		    throw new RuntimeException("Duplicate vertexID " + vertexID);
+	    }
 
-	// 构造 StreamNode
-	StreamNode vertex = new StreamNode(
-		vertexID,
-		slotSharingGroup,
-		coLocationGroup,
-		operatorFactory,
-		operatorName,
-		new ArrayList<OutputSelector<?>>(),
-		vertexClass);
+	    // 构造 StreamNode
+	    StreamNode vertex = new StreamNode(
+		    vertexID,
+		    slotSharingGroup,
+		    coLocationGroup,
+		    operatorFactory,
+		    operatorName,
+		    new ArrayList<OutputSelector<?>>(),
+		    vertexClass);
 
-	// 保存在 streamNodes 这个 map 中
-	streamNodes.put(vertexID, vertex);
+	    // 保存在 streamNodes 这个 map 中
+	    streamNodes.put(vertexID, vertex);
 
-	return vertex;
+	    return vertex;
+    }
 }
 ```
 
 下面我们再看下 transformPartition() 非物理节点的转换方法：
 ```java
-private <T> Collection<Integer> transformPartition(PartitionTransformation<T> partition) {
-	Transformation<T> input = partition.getInput();
-	List<Integer> resultIds = new ArrayList<>();
+public class StreamGraphGenerator {
 
-	// 递归遍历转换上游节点
-	Collection<Integer> transformedIds = transform(input);
-	for (Integer transformedId: transformedIds) {
-		int virtualId = Transformation.getNewNodeId();
-		// 添加虚拟的 Partition 节点
-		streamGraph.addVirtualPartitionNode(
-				transformedId, virtualId, partition.getPartitioner(), partition.getShuffleMode());
-		resultIds.add(virtualId);
-	}
+    private <T> Collection<Integer> transformPartition(PartitionTransformation<T> partition) {
+	    Transformation<T> input = partition.getInput();
+	    List<Integer> resultIds = new ArrayList<>();
 
-	return resultIds;
+	    // 递归遍历转换上游节点
+	    Collection<Integer> transformedIds = transform(input);
+	    for (Integer transformedId: transformedIds) {
+		    int virtualId = Transformation.getNewNodeId();
+		    // 添加虚拟的 Partition 节点
+		    streamGraph.addVirtualPartitionNode(
+				    transformedId, virtualId, partition.getPartitioner(), partition.getShuffleMode());
+		    resultIds.add(virtualId);
+	    }
+
+	    return resultIds;
+    }
+
+   
 }
+```
 
-public void addVirtualPartitionNode(
-	Integer originalId,
-	Integer virtualId,
-	StreamPartitioner<?> partitioner,
-	ShuffleMode shuffleMode) {
+```java
+public class StreamGraph {
+    
+    public void addVirtualPartitionNode(
+	    Integer originalId,
+	    Integer virtualId,
+	    StreamPartitioner<?> partitioner,
+	    ShuffleMode shuffleMode) {
 
-	if (virtualPartitionNodes.containsKey(virtualId)) {
-		throw new IllegalStateException("Already has virtual partition node with id " + virtualId);
-	}
+	    if (virtualPartitionNodes.containsKey(virtualId)) {
+		    throw new IllegalStateException("Already has virtual partition node with id " + virtualId);
+	    }
 
-	// 添加一个虚拟节点到 virtualPartitionNodes 中，后续添加边的时候会连接到实际的物理节点
-	virtualPartitionNodes.put(virtualId, new Tuple3<>(originalId, partitioner, shuffleMode));
-}	
+	    // 添加一个虚拟节点到 virtualPartitionNodes 中，后续添加边的时候会连接到实际的物理节点
+	    virtualPartitionNodes.put(virtualId, new Tuple3<>(originalId, partitioner, shuffleMode));
+    }
+}
 ```
 
 在实际的物理节点执行添加边的操作时，会判断上游是不是虚拟节点，如果是则会一直递归调用，将虚拟节点的信息添加到边中，直到连接到一个物理转换节点为止：
 ```java
-private void addEdgeInternal(Integer upStreamVertexID,
+public class StreamGraph {
+    
+    private void addEdgeInternal(Integer upStreamVertexID,
 							 Integer downStreamVertexID,
 							 int typeNumber,
 							 StreamPartitioner<?> partitioner,
@@ -538,56 +574,57 @@ private void addEdgeInternal(Integer upStreamVertexID,
 							 OutputTag outputTag,
 							 ShuffleMode shuffleMode) {
 
-	// 先判断是不是虚拟节点上的边，如果是，则找到虚拟节点上游对应的物理节点
-	// 在两个物理节点之间添加边，并把对应的 outputTag 或 StreamPartitioner 添加到 StreamEdge 中
-	if (virtualSideOutputNodes.containsKey(upStreamVertexID)) {
+	    // 先判断是不是虚拟节点上的边，如果是，则找到虚拟节点上游对应的物理节点
+	    // 在两个物理节点之间添加边，并把对应的 outputTag 或 StreamPartitioner 添加到 StreamEdge 中
+	    if (virtualSideOutputNodes.containsKey(upStreamVertexID)) {
 			
-	} else if (virtualSelectNodes.containsKey(upStreamVertexID)) {
+	    } else if (virtualSelectNodes.containsKey(upStreamVertexID)) {
 			
-	} else if (virtualPartitionNodes.containsKey(upStreamVertexID)) {
-		int virtualId = upStreamVertexID;
-		upStreamVertexID = virtualPartitionNodes.get(virtualId).f0;
-		if (partitioner == null) {
-			partitioner = virtualPartitionNodes.get(virtualId).f1;
-		}
-		shuffleMode = virtualPartitionNodes.get(virtualId).f2;
-		addEdgeInternal(upStreamVertexID, downStreamVertexID, typeNumber, partitioner, outputNames, outputTag, shuffleMode);
-	} else {
+	    } else if (virtualPartitionNodes.containsKey(upStreamVertexID)) {
+		    int virtualId = upStreamVertexID;
+		    upStreamVertexID = virtualPartitionNodes.get(virtualId).f0;
+		    if (partitioner == null) {
+			    partitioner = virtualPartitionNodes.get(virtualId).f1;
+		    }
+		    shuffleMode = virtualPartitionNodes.get(virtualId).f2;
+		    addEdgeInternal(upStreamVertexID, downStreamVertexID, typeNumber, partitioner, outputNames, outputTag, shuffleMode);
+	    } else {
 
-		// 两个物理节点
-		StreamNode upstreamNode = getStreamNode(upStreamVertexID);
-		StreamNode downstreamNode = getStreamNode(downStreamVertexID);
+		    // 两个物理节点
+		    StreamNode upstreamNode = getStreamNode(upStreamVertexID);
+		    StreamNode downstreamNode = getStreamNode(downStreamVertexID);
 
-		// If no partitioner was specified and the parallelism of upstream and downstream
-		// operator matches use forward partitioning, use rebalance otherwise.
-		if (partitioner == null && upstreamNode.getParallelism() == downstreamNode.getParallelism()) {
-			partitioner = new ForwardPartitioner<Object>();
-		} else if (partitioner == null) {
-			partitioner = new RebalancePartitioner<Object>();
-		}
+		    // If no partitioner was specified and the parallelism of upstream and downstream
+		    // operator matches use forward partitioning, use rebalance otherwise.
+		    if (partitioner == null && upstreamNode.getParallelism() == downstreamNode.getParallelism()) {
+			    partitioner = new ForwardPartitioner<Object>();
+		    } else if (partitioner == null) {
+			    partitioner = new RebalancePartitioner<Object>();
+		    }
 
-		if (partitioner instanceof ForwardPartitioner) {
-			if (upstreamNode.getParallelism() != downstreamNode.getParallelism()) {
-				throw new UnsupportedOperationException("Forward partitioning does not allow " +
-					"change of parallelism. Upstream operation: " + upstreamNode + " parallelism: " + upstreamNode.getParallelism() +
-					", downstream operation: " + downstreamNode + " parallelism: " + downstreamNode.getParallelism() +
-					" You must use another partitioning strategy, such as broadcast, rebalance, shuffle or global.");
-			}
-		}
+		    if (partitioner instanceof ForwardPartitioner) {
+			    if (upstreamNode.getParallelism() != downstreamNode.getParallelism()) {
+				    throw new UnsupportedOperationException("Forward partitioning does not allow " +
+					    "change of parallelism. Upstream operation: " + upstreamNode + " parallelism: " + upstreamNode.getParallelism() +
+					    ", downstream operation: " + downstreamNode + " parallelism: " + downstreamNode.getParallelism() +
+					    " You must use another partitioning strategy, such as broadcast, rebalance, shuffle or global.");
+			    }
+		    }
 
-		if (shuffleMode == null) {
-			shuffleMode = ShuffleMode.UNDEFINED;
-		}
+		    if (shuffleMode == null) {
+			    shuffleMode = ShuffleMode.UNDEFINED;
+		    }
 
-		// 创建 StreamEdge，带着 outputTag 、StreamPartitioner 等属性
-		StreamEdge edge = new StreamEdge(upstreamNode, downstreamNode, typeNumber, outputNames, partitioner, outputTag, shuffleMode);
+		    // 创建 StreamEdge，带着 outputTag 、StreamPartitioner 等属性
+		    StreamEdge edge = new StreamEdge(upstreamNode, downstreamNode, typeNumber, outputNames, partitioner, outputTag, shuffleMode);
 
-		// 分别将 StreamEdge 添加到上游节点和下游节点
-		// 获取上游节点，添加 OutEdge
-		getStreamNode(edge.getSourceId()).addOutEdge(edge);
-		// 获取下游节点，添加 InEdge
-		getStreamNode(edge.getTargetId()).addInEdge(edge);
-	}
+		    // 分别将 StreamEdge 添加到上游节点和下游节点
+		    // 获取上游节点，添加 OutEdge
+		    getStreamNode(edge.getSourceId()).addOutEdge(edge);
+		    // 获取下游节点，添加 InEdge
+		    getStreamNode(edge.getTargetId()).addInEdge(edge);
+	    }
+    }
 }
 ```
 
@@ -604,8 +641,124 @@ StreamExecutionEnvironment 中。当调用 env.execute() 时，会遍历其中�
 
 
 
+## 自带 WordCount 示例详解
 
+通过前面的内容，我们已经大概熟悉了 DataStream API  的使用， `flink-streaming-java` 中的一些核心类以及它们之间的转换关系。
 
+下面我们详细介绍自带的 WordCount 示例，来看看一个流式应用是如何从DataStream API 生成 StreamGraph 的。代码如上 `1.1 自带 WordCount 代码示例` 所示，这里先给出总的剖析图。
+
+![](./img_streamgraph/自带WordCount示例详解.png)
+
+中间 DataStream API 子图表部分演示了 WordCount 示例的 API 作用过程：
+1. 从 String[] 数据生成 'Collection Source' 流，对应 SourceTransformation{id=1,name='Collection Source',outputType='String',parallelism=1}
+2. flatMap 作用到流上，切割每一行的单词，输出 <word,1> 键值对，对应 OneInputTransformation{id=2,name='Flat Map',outputType='Java Tuple2<String,Integer>',parallelism=8}
+3. keyBy(0)按单词进行分组，对应 PartitionTransformation{id=3,name='Partition',outputType='Java Tuple2<String,Integer>',parallelism=8}
+4. sum(1)，统计相同单词出现的次数，OneInputTransformation{id=4,name='Keyed Aggregation',outputType='Java Tuple2<String,Integer>',parallelism=8}
+5. print()，输出 <word,count> 键值对到屏幕上，对应 SinkTransformation{id=5,name='Unnamed',outputType=GenericType<java.lang.Object>,parallelism=8}
+
+这个过程中，会将 2、4、5 对应的 Transformation 添加到 StreamExecutionEnvironment 的 transformations 列表中。
+
+接着执行 `env.execute("Streaming WordCount")` 时，遍历 transformations 生成 StreamGraph ，转换过程对应最下面的子图表。
+
+会按顺序遍历 2、4、5对应的 Transformation：
+1. 遍历 OneInputTransformation{id=2,name='Flat Map',outputType='Java Tuple2<String,Integer>',parallelism=8}
+   1）首先会将 'Flat Map' 的上游 Transformation 'Collection Source' 转换成 StreamNode，分别添加到 StreamGraph 的 streamNodes 和 sources 
+   集合中；
+   2）接着将 Transformation 'Flat Map' 转换成 StreamNode，添加到 streamNodes 集合中；
+   3）在 'Collection Source' 和 'Flat Map' 之间添加一条 StreamEdge ，由于 1、2 的 parallelism 不相同，所以路由走的是 RebalancePartitioner，
+   (Source: Collection Source-1 -> Flat Map-2, typeNumber=0, selectedNames=[], outputPartitioner=REBALANCE, outputTag=null)；
+   
+2. 遍历 OneInputTransformation{id=4,name='Keyed Aggregation',outputType='Java Tuple2<String,Integer>',parallelism=8}
+   1）首先会转换 'Keyed Aggregation' 的上游 Transformation 'Partition'，将 Transformation 类的 idCounter 自增1 得到 virtualId 为 6，
+    添加到 StreamGraph 的 virtualPartitionNodes 集合中；
+   2）接着将 Transformation 'Keyed Aggregation' 转换成 StreamNode，添加到 streamNodes 集合中； 
+   3）在 'Partition' 的上游 'Flat Map' 和 'Keyed Aggregation' 之间添加一条 StreamEdge ，路由走的是 'Partition' 的 HashPartitioner，
+   (Flat Map-2 -> Keyed Aggregation-4, typeNumber=0, selectedNames=[], outputPartitioner=REBALANCE, outputTag=null)；
+   
+3. 遍历 SinkTransformation{id=5,name='Unnamed',outputType=GenericType<java.lang.Object>,parallelism=8}
+   1）将 Transformation 'Sink: Print to std. Out' 转换成 StreamNode，分别添加到 StreamGraph 的 streamNodes 和 sinks 集合中；
+   2）在 'Keyed Aggregation' 和 'Sink: Print to std. Out' 之间添加一条 StreamEdge，由于 4、5 的 parallelism 相同，所以路由走的是 
+   RebalancePartitioner，
+   (Keyed Aggregation-4 -> Sink: Print to std. Out-5, typeNumber=0, selectedNames=[], outputPartitioner=FORWARD, outputTag=null)
+
+到此，自带 WordCount 示例的 StreamGraph 就生成了。
+   
+可以使用代码获得执行计划图的json：
+```java
+public class WordCount {
+    public static void main(String[] args){
+        
+        // ...
+        // execute program
+        // env.execute("Streaming WordCount");
+        System.out.println(env.getExecutionPlan());
+   }
+}
+```
+
+获得的json内容如下：
+```json
+{
+    "nodes":[
+        {
+            "id":1,
+            "type":"Source: Collection Source",
+            "pact":"Data Source",
+            "contents":"Source: Collection Source",
+            "parallelism":1
+        },
+        {
+            "id":2,
+            "type":"Flat Map",
+            "pact":"Operator",
+            "contents":"Flat Map",
+            "parallelism":8,
+            "predecessors":[
+                {
+                    "id":1,
+                    "ship_strategy":"REBALANCE",
+                    "side":"second"
+                }
+            ]
+        },
+        {
+            "id":4,
+            "type":"Keyed Aggregation",
+            "pact":"Operator",
+            "contents":"Keyed Aggregation",
+            "parallelism":8,
+            "predecessors":[
+                {
+                    "id":2,
+                    "ship_strategy":"HASH",
+                    "side":"second"
+                }
+            ]
+        },
+        {
+            "id":5,
+            "type":"Sink: Print to Std. Out",
+            "pact":"Data Sink",
+            "contents":"Sink: Print to Std. Out",
+            "parallelism":8,
+            "predecessors":[
+                {
+                    "id":4,
+                    "ship_strategy":"FORWARD",
+                    "side":"second"
+                }
+            ]
+        }
+    ]
+}
+```
+
+打开[flink plan visualizer](https://flink.apache.org/visualizer/)将上面的json，输入到文本框，点击Draw进行可视化如下：
+
+![](./img_streamgraph/通过JSONGenerator得到的ExectionPlan图.png)
+
+与我们通过代码分析得到的 StreamGraph 是一致的。
+希望通过这篇文章，大家能将代码和 Flink Web UI 上生成的执行图对应上，以方便定位代码问题。
 
 
 
