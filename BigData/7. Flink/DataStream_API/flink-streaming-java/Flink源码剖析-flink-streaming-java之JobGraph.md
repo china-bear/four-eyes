@@ -1,68 +1,17 @@
 
 本文主要围绕 Flink 源码中 `flink-streaming-java` 模块。介绍下 StreamGraph 转成 JobGraph 的过程等。
 
-<!-- more -->
 
 StreamGraph 和 JobGraph 都是在 Client 端生成的，也就是说我们可以在 IDE 中通过断点调试观察 StreamGraph 和 JobGraph 的生成过程。
 StreamGraph 实际上只对应 Flink 作业在逻辑上的执行计划图，Flink 会进一步对 StreamGraph 进行转换，得到另一个执行计划图，即 JobGraph。
 
-## 调用链路
+## 1. 调用链路
 
-1. 使用 DataStream API 编写好程序之后，就会调用到 StreamExecutionEnvironment.execute() 方法了。
-   下面我们从 StreamExecutionEnvironment 中的 execute() 方法一直往下跟：
-```java
-@Public
-public class StreamExecutionEnvironment {
-/**
- * Streaming 程序的提交入口
- */
-public JobExecutionResult execute() throws Exception {
-	return execute(DEFAULT_JOB_NAME);
-}
+使用 DataStream API 编写好程序之后，就会调用到 StreamExecutionEnvironment.execute() 方法了，首先会调用 getStreamGraph 生成 StreamGraph。
+1. 调用到 StreamExecutionEnvironment 的 executeAsync() 方法，根据 Configuration 获取 PipelineExecutorFactory 和 PipelineExecutor 
 
-/**
- * 生成 StreamGraph
- */
-public JobExecutionResult execute(String jobName) throws Exception {
-	Preconditions.checkNotNull(jobName, "Streaming Job name should not be null.");
+![](./img_jobgraph/根据Configuration获取PipelineExecutorFactory和PipelineExecutor.png) 
 
-	return execute(getStreamGraph(jobName));
-}
-
-/**
- * 生成 JobGraph ，提交任务，并响应 JobListeners
- */
-@Internal
-public JobExecutionResult execute(StreamGraph streamGraph) throws Exception {
-	// 异步执行
-	final JobClient jobClient = executeAsync(streamGraph);
-
-	try {
-		final JobExecutionResult jobExecutionResult;
-
-		if (configuration.getBoolean(DeploymentOptions.ATTACHED)) {
-			jobExecutionResult = jobClient.getJobExecutionResult(userClassloader).get();
-		} else {
-			jobExecutionResult = new DetachedJobExecutionResult(jobClient.getJobID());
-		}
-
-		jobListeners.forEach(jobListener -> jobListener.onJobExecuted(jobExecutionResult, null));
-
-		return jobExecutionResult;
-	} catch (Throwable t) {
-		jobListeners.forEach(jobListener -> {
-			jobListener.onJobExecuted(null, ExceptionUtils.stripExecutionException(t));
-		});
-		ExceptionUtils.rethrowException(t);
-
-		// never reached, only make javac happy
-		return null;
-	}
-}
-}
-```
-
-2. 下面我们详细看看 StreamExecutionEnvironment 中的 executeAsync 方法：
 ```java
 @Public
 public class StreamExecutionEnvironment {
@@ -94,26 +43,15 @@ public JobClient executeAsync(StreamGraph streamGraph) throws Exception {
 		.execute(streamGraph, configuration);
 
 	// 异步调用的返回结果
-	try {
-		JobClient jobClient = jobClientFuture.get();
-		jobListeners.forEach(jobListener -> jobListener.onJobSubmitted(jobClient, null));
-		return jobClient;
-	} catch (Throwable t) {
-		jobListeners.forEach(jobListener -> jobListener.onJobSubmitted(null, t));
-		ExceptionUtils.rethrow(t);
-
-		// make javac happy, this code path will not be reached
-		return null;
-	}
-}
+	// ...
+  }
 }
 ```
 
-executeAsync 方法中有涉及到 PipelineExecutorFactory 和 PipelineExecutor 。 
 PipelineExecutorFactory 是通过 SPI ServiceLoader 加载的，我们看下 `flink-clients` 模块的 `META-INF.services` 文件：
 ![](img_jobgraph/flink-clients模块的META-INF文件.png)
 
-PipelineExecutorFactory 的实现子类，分别对应着 Flink 的不同部署模式，local、standalone、yarn、kubernets 等：
+PipelineExecutorFactory 的实现子类，分别对应着 Flink 的不同部署模式，如 local、standalone、yarn、kubernets 等：
 ![](img_jobgraph/PipelineExecutorFactory子类.png)
 
 这里我们只看下 LocalExecutorFactory 的实现：
@@ -142,41 +80,19 @@ public class LocalExecutorFactory implements PipelineExecutorFactory {
 PipelineExecutor 的实现子类与 PipelineExecutorFactory 与工厂类一一对应，负责将 StreamGraph 转成 JobGraph，并生成 ClusterClient 执行任务的提交：
 ![](img_jobgraph/PipelineExecutor子类.png)
 
-3. LocalExecutorFactory 对应的 LocalExecutor 实现如下：
+
+
+2. LocalExecutor 中的 getJobGraph 方法
+
+![](./img_jobgraph/LocalExecutor的getJobGraph方法的时序图.png)
+
 ```java
 @Internal
 public class LocalExecutor implements PipelineExecutor {
 
-	public static final String NAME = "local";
-
-	@Override
-	public CompletableFuture<JobClient> execute(Pipeline pipeline, Configuration configuration) throws Exception {
-		checkNotNull(pipeline);
-		checkNotNull(configuration);
-
-		// we only support attached execution with the local executor.
-		checkState(configuration.getBoolean(DeploymentOptions.ATTACHED));
-
-		// StreamGraph 转成 JobGraph
-		final JobGraph jobGraph = getJobGraph(pipeline, configuration);
-
-		// local 模式，本地启动一个 Mini Cluster
-		final MiniCluster miniCluster = startMiniCluster(jobGraph, configuration);
-		// 创建 MiniClusterClient ，准备提交任务
-		final MiniClusterClient clusterClient = new MiniClusterClient(configuration, miniCluster);
-        // 提交任务
-		CompletableFuture<JobID> jobIdFuture = clusterClient.submitJob(jobGraph);
-
-		jobIdFuture
-				.thenCompose(clusterClient::requestJobResult)
-				.thenAccept((jobResult) -> clusterClient.shutDownCluster());
-
-		return jobIdFuture.thenApply(jobID ->
-				new ClusterClientJobClientAdapter<>(() -> clusterClient, jobID));
-	}
-
+	// ...
 	private JobGraph getJobGraph(Pipeline pipeline, Configuration configuration) {
-		...
+		// ...
 
 		// 这里调用 FlinkPipelineTranslationUtil 的 getJobGraph() 方法
 		return FlinkPipelineTranslationUtil.getJobGraph(pipeline, configuration, 1);
@@ -185,8 +101,7 @@ public class LocalExecutor implements PipelineExecutor {
 ```
 
 
-4. 回归主题，我们看下 FlinkPipelineTranslationUtil 的 getJobGraph() 方法：
-   通过反射得到一个 FlinkPipelineTranslator 。
+FlinkPipelineTranslationUtil 中通过反射得到一个 FlinkPipelineTranslator ，即 StreamGraphTranslator：
 ```java
 public class FlinkPipelineTranslationUtil{
     public static JobGraph getJobGraph(
@@ -245,8 +160,10 @@ public class FlinkPipelineTranslationUtil{
 }
 ```
 
-接着走到 StreamGraphTranslator 的 translateToJobGraph 方法：
-就是调用 StreamGraph 类自己的 getJobGraph 方法了。
+3. 调用 StreamGraphTranslator 的 translateToJobGraph 方法，会一直调用到 StreamGraph 类自己的 getJobGraph 方法：
+
+![](./img_jobgraph/StreamGraphTranslator的translateToJobGraph方法的时序图.png)
+
 ```java
 public class StreamGraphTranslator implements FlinkPipelineTranslator {
 
@@ -266,25 +183,19 @@ public class StreamGraphTranslator implements FlinkPipelineTranslator {
 	}
 
 	@Override
-	public String translateToJSONExecutionPlan(Pipeline pipeline) {
-		checkArgument(pipeline instanceof StreamGraph,
-				"Given pipeline is not a DataStream StreamGraph.");
-
-		StreamGraph streamGraph = (StreamGraph) pipeline;
-
-		return streamGraph.getStreamingPlanAsJSON();
-	}
-
-	@Override
 	public boolean canTranslate(Pipeline pipeline) {
 		return pipeline instanceof StreamGraph;
 	}
 }
 ```
 
-在看 StreamGraph 的 getJobGraph 这个核心方法之前，我们先来看下 JobGraph 涉及到的几个类：
+到此，我们知道 StreamGraph 到 JobGraph 的核心转换方法是 StreamingJobGraphGenerator 的 createJobGraph 方法。
 
-## JobVertex
+接下来我们先看下 JobGraph 涉及到的几个类：
+
+## 2. 源码剖析
+
+### 2.1 JobVertex
 
 在 StreamGraph 中，每一个算子（Operator）对应了图中的一个节点（StreamNode）。StreamGraph 会被进一步优化，将多个符合条件的节点 Chain 在一起形成一个节点，从而减少数据在不同节点之间流动产生的序列化、反序列化、网络传输的开销。多个算子被 chain 在一起的形成的节点在 JobGraph 中对应的就是 JobVertex。
 每个 JobVertex 中包含一个或多个 Operators。
@@ -335,7 +246,7 @@ public class JobVertex {
 ```
 
 
-## JobEdge
+### 2.2 JobEdge
 在 StreamGraph 中，StreamNode 之间是通过 StreamEdge 建立连接的。在 JobGraph 中对应的是 JobEdge 。
 和 StreamEdge 中同时保留了源节点和目标节点(sourceId 和 targetId) 不同，在 JobEdge 中只有源节点的信息，JobEdge 是和节点的输出结果相关联的。
 ```java
@@ -385,7 +296,7 @@ public class JobEdge {
 ```
 
 
-## IntermediateDataSet
+### 2.3 IntermediateDataSet
 JobVertex 产生的数据被抽象为 IntermediateDataSet ，字面意思为中间数据集。
 JobVertex 是 IntermediateDataSet 的生产者，JobEdge 是 IntermediateDataSet 的消费者。
 ```java
@@ -452,7 +363,7 @@ public enum ResultPartitionType {
 }
 ```
 
-## StreamConfig
+### 2.4 StreamConfig
 对于每一个 StreamOperator ，也就是 StreamGraph 中的每一个 StreamNode ，在生成 JobGraph 的过程中 StreamingJobGraphGenerator 都会创建一个对应的 StreamConfig 。 StreamConfig 中保存了这个算子 (operator) 在运行时需要的所有配置信息，这些信息都是 k/v 存储在 Configuration 中的。
 ```java
 public class StreamConfig {
@@ -475,11 +386,11 @@ public class StreamConfig {
 		}
 	}
 
-	...
+	// ...
 }
 ```
 
-## StreamGraph 到 JobGraph 的核心转换
+### 2.5 StreamGraph 到 JobGraph 的核心转换
 
 1. 下面我们就来看看 StreamGraph 中的 getJobGraph() 这个核心方法：
 ```java
@@ -489,8 +400,8 @@ public class StreamGraph {
     }
 }
 ```
-
 2. 接着走到 StreamingJobGraphGenerator 的 createJobGraph() 方法：
+![](./img_jobgraph/StreamingJobGraphGenerator的createJobGraph方法的时序图.png)
 
 ```java
 public class StreamingJobGraphGenerator {
@@ -616,7 +527,7 @@ public class StreamingJobGraphGenerator {
 这个方法首先为所有节点生成一个唯一的 hash id，如果节点在多次提交中没有改变（包括并发度、上下游等），那么这个 id 就不会改变，这主要用于故障恢复。这里之所以不能用 StreamNode.id 代替，是因为 StreamNode.id 是一个从 1 开始的静态计数变量，同样的 job 在不同的提交中会得到不同的 id 。
 
 如下所示两个 job 是完全一样的，但是 source A 和 B 的 id 却不一样了。
-```java
+```txt
 // 范例1: A.id=1 B.id=2
 DataStream<String> A =  ...
 DataStream<String> B =  ...
@@ -873,6 +784,9 @@ public class StreamingJobGraphGenerator {
 }
 ```
 
+## 3. 自带 WordCount 示例详解
+
+![](./img_jobgraph/WordCount示例从StreamGraph转成JobGraph的示意图.png)
 
 
 

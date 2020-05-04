@@ -672,7 +672,7 @@ StreamExecutionEnvironment 中。当调用 env.execute() 时，会遍历其中�
    1）首先会转换 'Keyed Aggregation' 的上游 Transformation 'Partition'，将 Transformation 类的 idCounter 自增1 得到 virtualId 为 6，
     添加到 StreamGraph 的 virtualPartitionNodes 集合中；
    2）接着将 Transformation 'Keyed Aggregation' 转换成 StreamNode，添加到 streamNodes 集合中； 
-   3）在 'Partition' 的上游 'Flat Map' 和 'Keyed Aggregation' 之间添加一条 StreamEdge ，路由走的是 'Partition' 的 HashPartitioner，
+   3）在 'Partition' 的上游 'Flat Map' 和 'Keyed Aggregation' 之间添加一条 StreamEdge ，路由走的是 'Partition' 的 KeyGroupStreamPartitioner，
    (Flat Map-2 -> Keyed Aggregation-4, typeNumber=0, selectedNames=[], outputPartitioner=REBALANCE, outputTag=null)；
    
 3. 遍历 SinkTransformation{id=5,name='Unnamed',outputType=GenericType<java.lang.Object>,parallelism=8}
