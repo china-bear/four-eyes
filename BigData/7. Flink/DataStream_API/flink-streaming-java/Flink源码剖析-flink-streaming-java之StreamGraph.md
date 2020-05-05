@@ -81,6 +81,7 @@ public class WordCount {
 		// 1. 设置运行环境
 		final StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
 		env.getConfig().setGlobalJobParameters(params);
+		env.setParallelism(2);
 
 		// 2. 配置数据源读取数据
 		DataStream<String> text;
@@ -651,31 +652,35 @@ StreamExecutionEnvironment 中。当调用 env.execute() 时，会遍历其中�
 
 中间 DataStream API 子图表部分演示了 WordCount 示例的 API 作用过程：
 1. 从 String[] 数据生成 'Collection Source' 流，对应 SourceTransformation{id=1,name='Collection Source',outputType='String',parallelism=1}
-2. flatMap 作用到流上，切割每一行的单词，输出 <word,1> 键值对，对应 OneInputTransformation{id=2,name='Flat Map',outputType='Java Tuple2<String,Integer>',parallelism=8}
-3. keyBy(0)按单词进行分组，对应 PartitionTransformation{id=3,name='Partition',outputType='Java Tuple2<String,Integer>',parallelism=8}
-4. sum(1)，统计相同单词出现的次数，OneInputTransformation{id=4,name='Keyed Aggregation',outputType='Java Tuple2<String,Integer>',parallelism=8}
-5. print()，输出 <word,count> 键值对到屏幕上，对应 SinkTransformation{id=5,name='Unnamed',outputType=GenericType<java.lang.Object>,parallelism=8}
+2. flatMap 作用到流上，切割每一行的单词，输出 <word,1> 键值对，对应 OneInputTransformation{id=2,name='Flat Map',outputType='Java 
+Tuple2<String,Integer>',parallelism=2}
+3. keyBy(0)按单词进行分组，对应 PartitionTransformation{id=3,name='Partition',outputType='Java Tuple2<String,Integer>',
+parallelism=2}
+4. sum(1)，统计相同单词出现的次数，OneInputTransformation{id=4,name='Keyed Aggregation',outputType='Java Tuple2<String,Integer>',
+parallelism=2}
+5. print()，输出 <word,count> 键值对到屏幕上，对应 SinkTransformation{id=5,name='Unnamed',outputType=GenericType<java.lang
+.Object>,parallelism=2}
 
 这个过程中，会将 2、4、5 对应的 Transformation 添加到 StreamExecutionEnvironment 的 transformations 列表中。
 
 接着执行 `env.execute("Streaming WordCount")` 时，遍历 transformations 生成 StreamGraph ，转换过程对应最下面的子图表。
 
 会按顺序遍历 2、4、5对应的 Transformation：
-1. 遍历 OneInputTransformation{id=2,name='Flat Map',outputType='Java Tuple2<String,Integer>',parallelism=8}
+1. 遍历 OneInputTransformation{id=2,name='Flat Map',outputType='Java Tuple2<String,Integer>',parallelism=2}
    1）首先会将 'Flat Map' 的上游 Transformation 'Collection Source' 转换成 StreamNode，分别添加到 StreamGraph 的 streamNodes 和 sources 
    集合中；
    2）接着将 Transformation 'Flat Map' 转换成 StreamNode，添加到 streamNodes 集合中；
    3）在 'Collection Source' 和 'Flat Map' 之间添加一条 StreamEdge ，由于 1、2 的 parallelism 不相同，所以路由走的是 RebalancePartitioner，
    (Source: Collection Source-1 -> Flat Map-2, typeNumber=0, selectedNames=[], outputPartitioner=REBALANCE, outputTag=null)；
    
-2. 遍历 OneInputTransformation{id=4,name='Keyed Aggregation',outputType='Java Tuple2<String,Integer>',parallelism=8}
+2. 遍历 OneInputTransformation{id=4,name='Keyed Aggregation',outputType='Java Tuple2<String,Integer>',parallelism=2}
    1）首先会转换 'Keyed Aggregation' 的上游 Transformation 'Partition'，将 Transformation 类的 idCounter 自增1 得到 virtualId 为 6，
     添加到 StreamGraph 的 virtualPartitionNodes 集合中；
    2）接着将 Transformation 'Keyed Aggregation' 转换成 StreamNode，添加到 streamNodes 集合中； 
    3）在 'Partition' 的上游 'Flat Map' 和 'Keyed Aggregation' 之间添加一条 StreamEdge ，路由走的是 'Partition' 的 KeyGroupStreamPartitioner，
    (Flat Map-2 -> Keyed Aggregation-4, typeNumber=0, selectedNames=[], outputPartitioner=REBALANCE, outputTag=null)；
    
-3. 遍历 SinkTransformation{id=5,name='Unnamed',outputType=GenericType<java.lang.Object>,parallelism=8}
+3. 遍历 SinkTransformation{id=5,name='Unnamed',outputType=GenericType<java.lang.Object>,parallelism=2}
    1）将 Transformation 'Sink: Print to std. Out' 转换成 StreamNode，分别添加到 StreamGraph 的 streamNodes 和 sinks 集合中；
    2）在 'Keyed Aggregation' 和 'Sink: Print to std. Out' 之间添加一条 StreamEdge，由于 4、5 的 parallelism 相同，所以路由走的是 
    RebalancePartitioner，
@@ -712,7 +717,7 @@ public class WordCount {
             "type":"Flat Map",
             "pact":"Operator",
             "contents":"Flat Map",
-            "parallelism":8,
+            "parallelism":2,
             "predecessors":[
                 {
                     "id":1,
@@ -726,7 +731,7 @@ public class WordCount {
             "type":"Keyed Aggregation",
             "pact":"Operator",
             "contents":"Keyed Aggregation",
-            "parallelism":8,
+            "parallelism":2,
             "predecessors":[
                 {
                     "id":2,
@@ -740,7 +745,7 @@ public class WordCount {
             "type":"Sink: Print to Std. Out",
             "pact":"Data Sink",
             "contents":"Sink: Print to Std. Out",
-            "parallelism":8,
+            "parallelism":2,
             "predecessors":[
                 {
                     "id":4,
