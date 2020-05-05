@@ -5,6 +5,8 @@
 StreamGraph 和 JobGraph 都是在 Client 端生成的，也就是说我们可以在 IDE 中通过断点调试观察 StreamGraph 和 JobGraph 的生成过程。
 StreamGraph 实际上只对应 Flink 作业在逻辑上的执行计划图，Flink 会进一步对 StreamGraph 进行转换，得到另一个执行计划图，即 JobGraph。
 
+![](./img_jobgraph/第二层JobGraph.png)
+
 ## 1. 调用链路
 
 使用 DataStream API 编写好程序之后，就会调用到 StreamExecutionEnvironment.execute() 方法了，首先会调用 getStreamGraph 生成 StreamGraph。

@@ -2,7 +2,7 @@
 本文主要围绕 Flink 源码中 `flink-streaming-java` 模块。介绍如何使用 DataStream API 进行 Flink 流任务开发，`flink-streaming-java` 模块中的一些重要类，贯穿着介绍下从 DataStream 
 API 到 StreamGraph 的构建过程。
 
-
+![](./img_streamgraph/第一层StreamGraph.png)
 
 ## DataStream API使用一览
 
