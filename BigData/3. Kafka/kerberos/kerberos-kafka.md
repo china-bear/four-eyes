@@ -168,3 +168,23 @@ security.protocol=SASL_PLAINTEXT
 sasl.mechanism=GSSAPI
 sasl.kerberos.service.name=kafka
 ```
+
+> 参考：
+>
+> https://simple.wikipedia.org/wiki/Kerberos_(protocol)
+>
+> https://www.orchome.com/436
+>
+> https://community.cloudera.com/t5/Support-Questions/Kafka-client-code-does-not-currently-support-obtaining-a/td-p/283879
+>
+> https://www.cnblogs.com/bdicaprio/articles/10096250.html
+>
+> https://stackoverflow.com/questions/43469962/kafka-sasl-zookeeper-authentication
+>
+> https://docs.confluent.io/4.1.1/kafka/authentication_sasl_gssapi.html#
+>
+> https://www.orchome.com/326
+>
+> https://www.orchome.com/1944
+>
+> https://www.orchome.com/500
