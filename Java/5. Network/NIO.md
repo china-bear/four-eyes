@@ -415,7 +415,7 @@ https://blog.csdn.net/zhejfl/article/details/82555634
 
 DMA的出现就是为了解决批量数据的输入/输出问题。DMA是指外部设备不通过CPU而直接与系统内存交换数据的接口技术。类比显卡，也是从CPU中剥离出来的功能。将这些特殊的模块进行剥离，使得CPU可以更加专注于计算工作。
 
-通常系统总线是由CPU管理的，在ＤＭＡ方式时，就希望CPU把这些总线让出来而由DMA控制器接管，控制传送的字节数，判断DMA是否结束，以及发出DMA结束信号。因此DMA控制器必须有以下功能:
+通常系统总线是由CPU管理的，在ＤＭＡ方式时，就希望CPU把这些总线让出来而由DMA控制器接管，控制传送的字节数，判断MA是否结束，以及发出DMA结束信号。因此DMA控制器必须有以下功能:
 
 1、能向CPU发出系统保持(HOLD)信号，提出总线接管请求；
 
@@ -548,10 +548,7 @@ mmap 把文件映射到用户空间里的虚拟地址空间，实现文件磁盘
 概括而言，mmap有以下特点：
 
 1. 文件直接映射到用户虚拟地址空间，避免了一次数据拷贝
-
-2. []: 
-
-3. 建立mmap之后，并不会立马加载数据到内存，只有真正使用数据时，才会引发缺页异常并加载数据到内存
+2. 建立mmap之后，并不会立马加载数据到内存，只有真正使用数据时，才会引发缺页异常并加载数据到内存
 
 
 
@@ -987,37 +984,18 @@ private static class Deallocator
 
 
 
-三、顺序读为什么快？
-
-[pagecache与PTE的区别]: https://www.jianshu.com/p/bff46f531920
-
-
-
-https://www.cnkirito.moe/file-io-best-practise/
-
-https://github.com/farmerjohngit/myblog/issues/10
-
-https://juejin.im/post/5be538fff265da611b57da10
-
-https://www.cnkirito.moe/file-io-best-practise
-
-https://blog.csdn.net/weixin_43815050/article/details/95218893
-
-https://www.cnkirito.moe/nio-buffer-recycle/
-
-https://www.cnkirito.moe/file-io-best-practise/
-
-https://mp.weixin.qq.com/s/EWx-AOeQAP0Maa4HzlgkCQ
-
-https://mp.weixin.qq.com/s/1Hi4acZXyer0gnyxUGCDdg
-
-https://mp.weixin.qq.com/s/MQD-d2Ki8GeAscd9K78zJg
-
-https://blog.csdn.net/zhejfl/article/details/82555634
-
-https://juejin.im/post/5be538fff265da611b57da10
-
-https://zhuanlan.zhihu.com/p/27679281
-
-https://zhuanlan.zhihu.com/p/27698585
+> 参考：
+> https://www.jianshu.com/p/bff46f531920 
+> https://www.cnkirito.moe/file-io-best-practise/ 
+> https://www.cnkirito.moe/nio-buffer-recycle/
+> https://www.ibm.com/developerworks/cn/linux/l-cache/index.html 
+> https://mp.weixin.qq.com/s/MQD-d2Ki8GeAscd9K78zJg
+> https://happyseeker.github.io/kernel/2016/05/03/sharing-memory-by-mmap.html 
+> https://zhuanlan.zhihu.com/p/96098896 
+> https://www.jianshu.com/p/eece39beee20 
+> https://blog.csdn.net/yusiguyuan/article/details/23388771 
+> https://www.cnblogs.com/huxiao-tee/p/4660352.html 
+> https://www.jianshu.com/p/eece39beee20 
+> https://zhuanlan.zhihu.com/p/27698585 
+> https://juejin.im/post/5be538fff265da611b57da10
 
