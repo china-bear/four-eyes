@@ -465,7 +465,6 @@ public class OrderedStreamElementQueue implements StreamElementQueue {
         // 如果一直插入失败，则AsyncWaitOperator#addAsyncBufferEntry方法会无限尝试插入，极致情况下，会触发Flink自身的反压机制，用户不用做任何特殊处理
 				LOG.debug("Failed to put element into ordered stream element queue because it " +
 					"was full ({}/{}).", queue.size(), capacity);
-
 				return false;
 			}
 		} finally {
@@ -624,8 +623,6 @@ public class Emitter<OUT> implements Runnable {
 区别于ordered模式，无序模式下的StreamRecordBufferEntry对象外层又被封装了一层Set层，主要是为了应对watermark的存在，详情见下节。基于processtime的unordered模式下，虽然没有watermark，但是也跟基于eventTime的unordered模式共用了同一套逻辑，因此也多了一层Set层。
 
 该模式下，不存在watermark类型的消息，因此所有消息的StreamRecordBufferEntry对象都是放入lastSet（此模式下，lastSet和firstSet引用相同的对象）,在消息的onCompleteHandler方法中，直接将该消息的StreamRecordBufferEntry对象从lastSet中取出再放入completeQueue中，通过emitter线程发送至下游operator，因此该场景下实现的是完全无序的处理模式。
-
-
 
 云邪在其博客
 
@@ -868,7 +865,7 @@ public class UnorderedStreamElementQueue implements StreamElementQueue {
 		lock.lockInterruptibly();
 
 		try {
-      // 从firstSet中取出StreamRecordBufferEntry对象
+      // 从firstSet中取出StreamRecordBufferEntry对象，每次都是尝试从firstSet中获取StreamRecordBufferEntry对象，通过这个if逻辑来控制watermark和set之间的顺序
 			if (firstSet.remove(streamElementQueueEntry)) {
         // 将取出的StreamRecordBufferEntry对象加入completedQueue
 				completedQueue.offer(streamElementQueueEntry);
@@ -902,6 +899,22 @@ public class UnorderedStreamElementQueue implements StreamElementQueue {
 ##### 3.4.2 消费
 
 Emitter线程消费逻辑同ordered模式
+
+### 4. 总结
+
+1. Flink Async I/O利用队列来存储加宽前（ordered模式）或加宽后（基于processtime的unordered模式）的数据，并通过队列和Emitter轮询线程将生产数据与消费数据进行解耦。
+
+2. ordered模式，通过将未返回结果的StreamRecordBufferEntry对象按顺序插入队列，并通过判断头结点是否返回，来控制消费顺序与生产顺序一致
+3. 基于processtime的unordered模式，在数据回调逻辑中，将StreamRecordBufferEntry对象插入队列，即队列中的所有StreamRecordBufferEntry对象都是已经返回异步结果并加宽后的数据。
+4. 基于eventTime的unordered模式，uncompleteQueue存储加宽前的数据（异步调用返回前），completeQueue存储加宽后的数据，通过firstSet这个设计，来控制watermark和数据卷set之间的顺序。
+
+
+
+
+
+
+
+
 
 > 参考：
 >
